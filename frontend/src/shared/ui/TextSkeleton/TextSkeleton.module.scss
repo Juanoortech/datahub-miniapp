@@ -1,0 +1,34 @@
+.root {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    width: 100%;
+}
+
+.inner {
+    border-radius: 10px;
+    opacity: 0.6;
+}
+
+.view {
+    &_base {
+        background-color: #000;
+    }
+
+    &_secondary {
+        background-color: #4c5257;
+    }
+
+    &_brand {
+        background-color: #0058ff;
+    }
+
+    &_success {
+        background-color: #007132;
+    }
+
+    &_critical {
+        background-color: #c50700;
+    }
+}

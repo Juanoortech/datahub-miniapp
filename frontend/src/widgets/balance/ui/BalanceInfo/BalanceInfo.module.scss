@@ -1,0 +1,39 @@
+.root {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: calc(100% - 40px);
+    margin: 24px auto 0;
+}
+
+.content {
+    width: calc(100% - 48px);
+}
+
+.title {
+    min-width: 100%;
+
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 20px;
+    color: #161718;
+}
+
+.value {
+    min-width: 100%;
+
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 48px;
+    letter-spacing: -0.01em;
+    color: #161718;
+
+    text-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    span {
+        color: #838b93;
+    }
+}

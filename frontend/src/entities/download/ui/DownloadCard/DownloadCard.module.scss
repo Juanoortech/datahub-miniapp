@@ -1,0 +1,24 @@
+.title {
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: -0.02em;
+    color: #fafbff;
+}
+
+.description {
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 20px;
+    color: #fafbff;
+
+    margin-top: 12px;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin-top: 16px;
+}

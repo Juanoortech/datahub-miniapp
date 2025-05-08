@@ -1,0 +1,25 @@
+.root {
+    width: calc(100% - 32px);
+    min-height: unset;
+    left: 16px;
+
+    padding: 16px;
+    border-radius: 16px;
+    box-sizing: border-box;
+
+    background-color: rgba(0, 0, 0, 1);
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+
+    p {
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 1);
+    }
+}

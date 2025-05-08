@@ -1,0 +1,25 @@
+.root {
+    width: fit-content;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 12px;
+    line-height: 16px;
+    font-family: 500;
+}
+
+.view {
+    &_secondary {
+        color: #4c5257;
+    }
+
+    &_brand {
+        color: #0058ff;
+    }
+}
+
+.icon {
+    margin-right: 4px;
+}

@@ -1,0 +1,41 @@
+.root {
+    display: block;
+
+    transform: 0.3s ease;
+    transition-property: color;
+}
+
+.view {
+    &_surface {
+        color: #FFF;
+    }
+
+    &_secondary {
+        color: #4c5257;
+    }
+
+    &_dark {
+        color: #000;
+    }
+
+    &_brand {
+        color: #0058ff;
+    }
+
+    &_success {
+        color: #007132;
+    }
+
+    &_warning {
+        color: #EDA701;
+    }
+
+    &_critical {
+        color: #c50700;
+    }
+
+    &_secondary-light {
+        color: #161718;
+        opacity: 0.24;
+    }
+}

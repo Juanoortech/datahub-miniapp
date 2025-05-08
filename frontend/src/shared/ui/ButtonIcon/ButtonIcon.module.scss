@@ -1,0 +1,72 @@
+.root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    aspect-ratio: 1;
+
+    box-sizing: border-box;
+
+    outline: none;
+    border: none;
+
+    cursor: pointer;
+
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.size {
+    &_l {
+        width: 52px;
+    }
+
+    &_m {
+        width: 40px;
+    }
+}
+
+.radius {
+    &_m {
+        border-radius: 16px;
+    }
+
+    &_rounded {
+        border-radius: 50%;
+    }
+}
+
+.view {
+    &_surface {
+        background: #fff;
+    }
+
+    &_brand {
+        background: #0058ff;
+    }
+
+    &_flat {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.46);
+    }
+
+    &_surface-secondary {
+        background-color: rgba(255, 255, 255, 1);
+        border: 1px solid rgba(22, 23, 24, 0.17);
+    }
+
+    &_skeleton {
+        background-color: #f7f7f8;
+    }
+
+    &_flat-dark {
+        background-color: rgba(6, 6, 7, 0.46);
+        border: 1px solid rgba(255, 255, 255, 1);
+    }
+}
+
+.is-disabled {
+    border: 1px solid #e6e8ea;
+    background: #e6e8ea;
+    color: #838b93;
+}

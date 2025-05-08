@@ -1,0 +1,28 @@
+.root {
+    padding: 32px 20px;
+    box-sizing: border-box;
+}
+
+.subtitle {
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 20px;
+    color: #4c5257;
+}
+
+.wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.amount {
+    font-size: 36px;
+    line-height: 48px;
+    font-weight: 500;
+    color: #161718;
+
+    & span {
+        color: #838b93;
+    }
+}

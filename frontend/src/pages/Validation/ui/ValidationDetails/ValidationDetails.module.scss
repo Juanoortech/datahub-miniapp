@@ -1,0 +1,35 @@
+.root {
+    position: relative;
+    margin-top: 24px;
+    padding-left: 20px;
+    box-sizing: border-box;
+    margin-left: 20px;
+    margin-right: 20px;
+
+    &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        border-radius: 2px;
+        background: #0058ff;
+    }
+}
+
+.title {
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: -0.02em;
+    color: #161718;
+}
+
+.description {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #161718;
+
+    margin-top: 16px;
+}

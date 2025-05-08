@@ -1,0 +1,31 @@
+.root {
+    overflow-y: scroll;
+
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    box-sizing: border-box;
+    padding-top: 10px;
+    padding-bottom: 24px;
+
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.item + .item {
+    margin-top: 8px;
+}
+
+.loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}

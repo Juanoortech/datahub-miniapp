@@ -1,0 +1,15 @@
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.description {
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 20px;
+    color: #161718;
+}

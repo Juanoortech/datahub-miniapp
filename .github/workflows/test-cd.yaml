@@ -1,0 +1,105 @@
+name: Deploy to test
+
+on:
+  push:
+    branches:
+      - 'develop'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set owner name to lower case
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
+
+      - name: Env File
+        run: |
+          touch .env
+          echo POSTGRES_HOST=$POSTGRES_HOST >> .env
+          echo POSTGRES_USER=$POSTGRES_USER >> .env
+          echo POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo POSTGRES_PORT=$POSTGRES_PORT >> .env
+          echo POSTGRES_DATABASE=$POSTGRES_DATABASE >> .env
+          echo TELEGRAM_TOKEN="${{ secrets.TELEGRAM_TOKEN }}" >> .env
+          echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env
+          echo TELEGRAM_URI=$TELEGRAM_TEST_DOMAIN >> .env
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.2.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.7.1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3.3.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push test-backend
+        uses: docker/build-push-action@v6.9.0
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: ./backend
+          push: true
+          target: prod
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/oort-test-backend:latest
+          #            ghcr.io/${{ env.OWNER_LC }}/oort-test-backend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/oort-test-backend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/oort-test-backend:buildcache,mode=max
+
+      - name: Build and push test-frontend
+        uses: docker/build-push-action@v6.9.0
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: ./frontend
+          push: true
+          target: node-prod
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/oort-test-frontend:latest
+          #            ghcr.io/${{ env.OWNER_LC }}/oort-test-backend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/oort-test-frontend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/oort-test-frontend:buildcache,mode=max
+
+      - name: Build and push test-bot
+        uses: docker/build-push-action@v6.9.0
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: ./bot
+          push: true
+          target: prod
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/oort-test-bot:latest
+          #            ghcr.io/${{ env.OWNER_LC }}/oort-test-backend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/oort-test-bot:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/oort-test-bot:buildcache,mode=max
+
+      - name: Deployment
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.TEST_HOST }}
+          username: ${{ secrets.TEST_HOST_USERNAME }}
+          password: ${{ secrets.TEST_HOST_PASSWORD }}
+          port: ${{ secrets.TEST_HOST_PORT }}
+          script: |
+            cd ~/oort
+            docker compose down
+            docker compose pull
+            docker compose up --build -d
+#      - name: Run compose
+#        run: docker compose -f docker-compose.dev.yaml up --build

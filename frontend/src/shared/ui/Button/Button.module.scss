@@ -1,0 +1,115 @@
+.root {
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+
+    outline: none;
+    border: none;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    -webkit-tap-highlight-color: transparent;
+
+    transition: 0.3s ease;
+    transition-property: background-color, color, border-color;
+}
+
+.size {
+    &_m {
+        padding: 16px 20px;
+        box-sizing: border-box;
+        border-radius: 16px;
+        height: 52px;
+
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 600;
+    }
+
+    &_s {
+        padding: 4px 8px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        height: 28px;
+
+        font-weight: 600;
+        font-size: 12px;
+        line-height: 20px;
+    }
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: 0.3s ease;
+    transition-property: opacity;
+}
+
+.is-loading .content {
+    opacity: 0;
+}
+
+.icon {
+    margin-right: 6px;
+}
+
+.loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.view {
+    &_surface {
+        border: 1px solid rgba(22, 23, 24, 0.17);
+        background-color: #fff;
+        color: #000;
+    }
+
+    &_surface-light {
+        border: 1px solid rgba(255, 255, 255, 0.46);
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+    }
+
+    &_brand {
+        border: 1px solid #0058ff;
+        background-color: #0058ff;
+        color: #fafbff;
+    }
+
+    &_critical {
+        border: 1px solid #ea1b13;
+        background-color: #ea1b13;
+        color: #fafbff;
+    }
+
+    &_skeleton {
+        background-color: #f7f7f8;
+    }
+
+    &_surface-critical {
+        background: #fff;
+        border: 1px solid rgba(22, 23, 24, 0.17);
+        color: #c50700;
+    }
+}
+
+.is-wide {
+    width: 100%;
+}
+
+.is-disabled {
+    border: 1px solid #e6e8ea;
+    background: #e6e8ea;
+    color: #838b93;
+}

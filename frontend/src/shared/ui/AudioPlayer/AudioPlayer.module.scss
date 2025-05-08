@@ -1,0 +1,44 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+    border-radius: 24px;
+    background: #fff;
+    box-sizing: border-box;
+
+    audio {
+        opacity: 0;
+    }
+}
+
+.source {
+    height: 0;
+}
+
+.wrapper {
+    width: 100%;
+    height: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+
+.button {
+    margin-top: 16px;
+}
+
+.item {
+    width: 4px;
+    height: 7px;
+    max-height: 160px;
+    border-radius: 2px;
+    background: #e6e8ea;
+}
+
+.is-active {
+    background: #0058ff;
+}

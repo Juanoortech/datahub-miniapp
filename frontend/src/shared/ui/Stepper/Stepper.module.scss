@@ -1,0 +1,54 @@
+.root {
+    width: 100%;
+}
+
+.view {
+    &_success {
+        .label {
+            color: #00A762;
+        }
+
+        .item.is-active {
+            background-color: #00A762;
+        }
+    }
+
+    &_warning {
+        .label {
+            color: #EDA701;
+        }
+
+        .item.is-active {
+            background-color: #EDA701;
+        }
+    }
+
+    &_critical {
+        .label {
+            color: #EA1B13;
+        }
+
+        .item.is-active {
+            background-color: #EA1B13;
+        }
+    }
+}
+
+.label {
+    font-size: 11px;
+    line-height: 12px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item {
+    height: 4px;
+    border-radius: 4px;
+    background-color: #E6E8EA;
+}

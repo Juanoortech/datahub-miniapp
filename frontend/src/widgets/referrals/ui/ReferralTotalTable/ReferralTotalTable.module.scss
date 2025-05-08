@@ -1,0 +1,129 @@
+.root {
+    padding-top: 20px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 24px;
+}
+
+.title {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #161718;
+}
+
+.balance {
+    display: flex;
+    justify-content: flex-end;
+    width: 50%;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 20px;
+    letter-spacing: -0.02em;
+    color: #161718;
+
+    span {
+        color: #838b93;
+        margin-left: 0.2em;
+    }
+}
+
+.table-wrapper {
+    width: 100%;
+    border-radius: 16px;
+    box-sizing: border-box;
+
+    border: 1px solid rgba(22, 23, 24, 0.08);
+    background: #fff;
+
+    overflow: hidden;
+}
+
+.skeleton {
+    min-height: 300px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+
+    tr {
+        td,
+        th {
+            &:nth-child(1) {
+                padding: 16px;
+                text-align: left;
+
+                font-weight: 500;
+                font-size: 13px;
+                line-height: 20px;
+                color: #161718;
+            }
+
+            &:nth-child(2) {
+                padding: 16px;
+                text-align: center;
+
+                font-weight: 400;
+                font-size: 13px;
+                line-height: 20px;
+                color: #161718;
+            }
+
+            &:nth-child(3) {
+                padding: 16px;
+                text-align: right;
+
+                font-weight: 600;
+                font-size: 13px;
+                line-height: 20px;
+                color: #0058ff;
+            }
+        }
+
+        th {
+            font-weight: 600!important;
+            color: #161718!important;
+        }
+    }
+}
+
+.thead {
+    width: 100%;
+    height: 52px;
+
+    box-sizing: border-box;
+
+    background: #f7f7f8;
+    border-bottom: 1px solid rgba(22, 23, 24, 0.08);
+}
+
+.row {
+    width: 100%;
+    height: 52px;
+
+    box-sizing: border-box;
+
+    & + & {
+        border-top: 1px solid rgba(22, 23, 24, 0.08);
+    }
+
+    td {
+        text-align: center;
+    }
+}
+
+.loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}

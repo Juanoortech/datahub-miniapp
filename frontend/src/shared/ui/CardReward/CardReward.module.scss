@@ -1,0 +1,52 @@
+.view {
+    &_surface {
+        color: #161718;
+
+        & span {
+            color: #007132;
+        }
+    }
+
+    &_dark {
+        color: #FAFBFF;
+
+        & span {
+            color: #00E766;
+        }
+    }
+}
+
+.title {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.item {
+    display: flex;
+    gap: 12px;
+    min-height: 25px;
+
+    & p {
+        width: calc(100% - 36px);
+        align-self: center;
+
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    & img {
+        align-self: flex-start;
+    }
+
+    & span {
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 600;
+    }
+
+    & + & {
+        margin-top: 12px;
+    }
+}

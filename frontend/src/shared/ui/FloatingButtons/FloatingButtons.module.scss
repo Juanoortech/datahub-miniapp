@@ -1,0 +1,22 @@
+.root {
+    display: flex;
+    justify-content: space-between;
+
+    position: fixed;
+    left: 0;
+    bottom: 80px;
+    padding: 16px;
+    box-sizing: border-box;
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 -1px 8px 0 rgba(39, 39, 39, 0.08);
+    border-radius: 16px 16px 0 0;
+}
+
+.is-one-button > * {
+    width: 100%;
+}
+
+.is-two-buttons > * {
+    width: calc(50% - 4px);
+}

@@ -1,0 +1,90 @@
+services:
+  db:
+    image: postgres:17
+    container_name: oort-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB' ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    profiles:
+      - backend-only
+      - full
+
+  #  redis:
+  #    image: redis:alpine
+  #    container_name: redis
+  #    environment:
+  #      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+  #      - ALLOW_EMPTY_PASSWORD=yes
+  #    ports:
+  #      - 6379:6379
+  #    volumes:
+  #      - ./redis:/bitnami/redis/data
+  #    profiles:
+  #      - backend-only
+  #      - full
+
+  backend:
+    restart: always
+    container_name: oort-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    #    image: azazelh/oort-test-backend:latest
+    depends_on:
+      - db
+    #      - redis
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - ./staticfiles:/app/staticfiles
+    ports:
+      - 8000:8000
+    profiles:
+      - backend-only
+      - full
+
+  bot:
+    restart: always
+    container_name: oort-bot
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+      target: development
+    #    image: azazelh/oort-test-bot:latest
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    volumes:
+      - ./bot/:/app/bot
+    profiles:
+      - full
+
+  frontend:
+    container_name: oort-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      # target: node-prod
+      target: node-development
+    #    image: azazelh/oort-test-frontend:latest
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/app
+    profiles:
+      - full

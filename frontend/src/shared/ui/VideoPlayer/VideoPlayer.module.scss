@@ -1,0 +1,22 @@
+.root {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+
+    video {
+        vertical-align: middle;
+    }
+}
+
+.play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    button {
+        background-color: transparent;
+        outline: none;
+        border: none;
+    }
+}
