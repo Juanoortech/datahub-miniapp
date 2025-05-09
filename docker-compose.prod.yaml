@@ -27,15 +27,6 @@ services:
     volumes:
       - /var/www/staticfiles:/app/staticfiles
 
-  bot:
-    restart: always
-    container_name: bot
-    image: azazelh/oort-prod-bot:latest
-    depends_on:
-      - backend
-    env_file:
-      - .env
-
   frontend:
     container_name: frontend
     image: azazelh/oort-prod-frontend:latest

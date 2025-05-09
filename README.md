@@ -84,5 +84,7 @@ $ docker exec -it backend sh
 $ python manage.py createsuperuser
 # Then follow the instructions
 ```
-The panel is usually at /admin/... and the api is on /api/v1/...
-_Ports to forward are shown at docker-compose files._
+
+http://localhost:8000/api/v1/docs
+http://localhost:8000/api/docs (redirects to /api/v1/docs)
+http://localhost:8000/admin/

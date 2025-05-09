@@ -1,7 +1,7 @@
 import {ResponseDefault} from "@/shared/lib/api/createRequest"
 
 export type GetViewerResponse = {
-    id: number,
+    wallet_address: string,
     photo: string,
     name: string,
     banned: boolean,
@@ -10,9 +10,9 @@ export type GetViewerResponse = {
     referral_code: string,
     referral_level: number,
     referral_earnings: number,
-    leaderboard_bonus: number
-    wallet_was_connected: boolean
-    wallet_connect_code: string
+    leaderboard_bonus: number,
+    wallet_was_connected: boolean,
+    wallet_connect_code: string,
     first_login: boolean
 }
 

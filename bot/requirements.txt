@@ -1,4 +1,0 @@
-aiogram==3.14.0
-aiohttp==3.10.10
-jurigged==0.6.0
-redis==5.2.0

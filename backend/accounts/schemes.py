@@ -23,12 +23,10 @@ class UserInit(Schema):
 
 
 class UserOut(Schema):
-    id: int
+    wallet_address: str
     photo: Optional[str] = None
     name: str
     balance: int
-    is_premium: bool = False
-    language_code: str = "en"
     referral_code: uuid.UUID
     wallet_connect_code: uuid.UUID
     wallet_was_connected: Optional[bool] = False
@@ -118,3 +116,9 @@ class WithdrawSchema(Schema):
 
 class DetailOut(Schema):
     detail: str
+
+
+class SignatureVerifyIn(Schema):
+    wallet_address: str
+    signature: str
+    message: str

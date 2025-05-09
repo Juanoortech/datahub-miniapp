@@ -9,15 +9,15 @@ class TransactionAdmin(admin.ModelAdmin):
 
 
 @admin.register(User)
-class TgUserAdmin(admin.ModelAdmin):
-    search_fields = ("name", "id", "referral_user__name", "referral_code")
-    list_display = ["id", "tg_username", "name", "balance", "is_premium", "language_code", "referral_code",
+class Web3UserAdmin(admin.ModelAdmin):
+    search_fields = ("name", "wallet_address", "referral_user__name", "referral_code")
+    list_display = ["wallet_address", "name", "balance", "referral_code",
                     "referral_user", "referral_level", "referral_earnings"]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
             return self.readonly_fields + (
-                "id",
+                "wallet_address",
                 "referral_code",
             )
         return self.readonly_fields

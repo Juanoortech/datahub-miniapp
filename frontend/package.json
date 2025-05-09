@@ -47,7 +47,9 @@
     "typescript": "^4.9.5",
     "uuid": "^11.0.3",
     "vaul": "^1.1.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "ethers": "^6.0.0",
+    "web3modal": "^1.9.12"
   },
   "scripts": {
     "dev": "craco start",

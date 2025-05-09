@@ -53,23 +53,6 @@ services:
       - backend-only
       - full
 
-  bot:
-    restart: always
-    container_name: oort-bot
-    build:
-      context: ./bot
-      dockerfile: Dockerfile
-      target: development
-    #    image: azazelh/oort-test-bot:latest
-    depends_on:
-      - backend
-    env_file:
-      - .env
-    volumes:
-      - ./bot/:/app/bot
-    profiles:
-      - full
-
   frontend:
     container_name: oort-frontend
     build:

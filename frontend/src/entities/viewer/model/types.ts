@@ -1,20 +1,19 @@
 export type Viewer = {
-    id: number,
+    walletAddress: string,
     photo: string,
     name: string,
     isBanned: boolean,
 
     balance: number,
-    referralsBalance: number
+    referralsBalance: number,
 
-    isPremium: boolean,
     referralCode: string,
     referralLevel: number,
-    leaderboardBonus: number
-    story: string
+    leaderboardBonus: number,
+    story: string,
 
-    isWalletConnect: boolean
-    walletConnectCode: string
+    isWalletConnect: boolean,
+    walletConnectCode: string,
 
     isFirstUse: boolean
 }

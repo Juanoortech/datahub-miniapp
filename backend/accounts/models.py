@@ -35,13 +35,10 @@ class DepositType(models.TextChoices):
 
 
 class User(models.Model):
-    id = models.BigIntegerField(primary_key=True, unique=True, verbose_name="TG ID")
-    tg_username = models.CharField(verbose_name="TG Username", max_length=255, blank=True, null=True, default=None)
+    wallet_address = models.CharField(max_length=64, unique=True, primary_key=True, verbose_name="Wallet Address")
     name = models.CharField(verbose_name="Name")
     photo = models.CharField(null=True, blank=True, verbose_name="Photo", default=None)
     balance = models.BigIntegerField(default=0, verbose_name="Balance")
-    is_premium = models.BooleanField(default=False)
-    language_code = models.CharField(default="en")
     referral_code = models.UUIDField(
         default=uuid.uuid4, unique=True, verbose_name="Referral Code"
     )
@@ -73,8 +70,8 @@ class User(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = "TG User"
-        verbose_name_plural = "TG Users"
+        verbose_name = "Web3 User"
+        verbose_name_plural = "Web3 Users"
 
     async def get_rank(self) -> int:
         rank = await User.objects.filter(

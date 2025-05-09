@@ -19,6 +19,8 @@ from accounts.schemes import *
 from core import settings
 
 from accounts.models import User, ReferralLevels, Transaction, TransactionType, TransactionStatus, DepositType
+from eth_account.messages import encode_defunct
+from eth_account import Account
 
 router = Router()
 
@@ -335,3 +337,18 @@ async def withdraw_points(request: WSGIRequest | ASGIRequest, data: WithdrawSche
             return 404, {"detail": "User not found"}
 
     return 200, successful_withdraws
+
+
+@router.post(
+    "/auth/web3/",
+    summary="Authenticate user via Web3 signature",
+)
+async def authenticate_web3(request: WSGIRequest | ASGIRequest, data: SignatureVerifyIn):
+    # Verify the signature using eth-account
+    message = encode_defunct(text=data.message)
+    recovered_address = Account.recover_message(message, signature=data.signature)
+    if recovered_address.lower() != data.wallet_address.lower():
+        return 400, {"detail": "Invalid signature"}
+    # Issue JWT or session token here
+    # ...
+    return 200, {"wallet_address": data.wallet_address}

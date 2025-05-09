@@ -27,15 +27,6 @@ services:
     env_file:
       - .env
 
-  bot:
-    restart: always
-    container_name: bot
-    image: azazelh/oort-test-bot:latest
-    depends_on:
-      - backend
-    env_file:
-      - .env
-
   frontend:
     container_name: frontend
     image: azazelh/oort-test-frontend:latest

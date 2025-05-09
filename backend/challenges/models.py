@@ -19,20 +19,6 @@ class CompletionTypes(TextChoices):
     NOT_STARTED = "Not Started"
 
 
-class TgChannel(models.Model):
-    uri = models.CharField(
-        verbose_name="Channel URI",
-        help_text="Link should be like @[name] and the bot should be an admin",
-    )
-
-    def __str__(self) -> str:
-        return self.uri
-
-    class Meta:
-        verbose_name = "TG Channel"
-        verbose_name_plural = "TG Channels"
-
-
 class Challenge(models.Model):
     title = models.CharField(verbose_name="Title")
     avatar = models.ImageField(
@@ -51,14 +37,6 @@ class Challenge(models.Model):
                                              default=False, )
     button_text = models.CharField(default="Connect", verbose_name="Button text")
     completion_limit = models.IntegerField(default=100, verbose_name="Completion limit")
-    channel = models.ForeignKey(
-        TgChannel,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        verbose_name="TG Channel",
-        help_text="Should be set up if internal type is REAL",
-    )
     redirect_link = models.URLField(verbose_name="Redirect link", blank=True, null=True, default=None,
                                     help_text="Link to redirect if task is imitation")
 
@@ -93,10 +71,6 @@ class Challenge(models.Model):
         if self.internal_type == ChallengeTypes.IMITATION and not self.redirect_link:
             raise ValidationError({
                 'redirect_link': "This field is required when internal type is 'Imitation'."
-            })
-        if self.internal_type == ChallengeTypes.REAL and not self.channel:
-            raise ValidationError({
-                'channel': "This field is required when internal type is 'Real'."
             })
 
 

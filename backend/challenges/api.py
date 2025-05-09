@@ -13,7 +13,6 @@ from ninja.pagination import paginate
 from accounts.api import authenticate
 from accounts.models import User, Transaction, TransactionType, DepositType, TransactionStatus
 from accounts.pagination import MyPaginator
-from challenges.checker import Checker
 from challenges.models import Challenge, ChallengeCompletion, ChallengeTypes
 from challenges.schemes import DetailOut, ChallengeFilterSchema, \
     ChallengeListSchema, ChallengeSchema, ChallengeCompletionSchema, CompletionSendOut
@@ -117,24 +116,9 @@ async def challenges_complete(request: WSGIRequest | ASGIRequest, challenge_id: 
             if challenge.channel is None:
                 return 400, {"detail": "Channel not specified"}
             # TODO: По-хорошему сделать асинхронным
-            resp = Checker().check_member(_id=user.id, channel=challenge.channel.uri)
-            if isinstance(resp, bytes):
-                return 400, {"detail": "Checker fail"}
-            data = resp.get("response")
-            if not data:
-                return 400, {"detail": "Checker fail"}
-
-            payload = json.loads(data)
-            status = payload.get("result", {"status": None}).get("status")
-            if status != "member":
-                return 200, {
-                    "created": created,
-                    "claim_prize": "not claimed",
-                }
-            await add_reward(user=user, challenge=challenge, completion_ch_object=completion_ch_object)
             return 200, {
                 "created": created,
-                "claim_prize": "claimed",
+                "claim_prize": "not claimed",
             }
         elif challenge.internal_type == ChallengeTypes.IMITATION:
             current_tz = timezone.get_current_timezone()

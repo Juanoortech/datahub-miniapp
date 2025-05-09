@@ -71,13 +71,12 @@ export const viewerModel = {
 
 function toDomain(data: GetViewerResponse): Viewer {
     return {
-        id: data.id,
+        walletAddress: data.wallet_address,
         photo: data.photo,
         name: data.name,
         isBanned: data.banned,
         balance: data.balance,
         referralsBalance: data.referral_earnings,
-        isPremium: data.is_premium,
         referralCode: data.referral_code,
         referralLevel: data.referral_level,
         leaderboardBonus: data.leaderboard_bonus,

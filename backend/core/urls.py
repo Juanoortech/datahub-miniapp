@@ -17,9 +17,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 
 from core.api import api
 
 urlpatterns = [path("admin/", admin.site.urls),
                # path("select2/", include("django_select2.urls")),
-               path("api/v1/", api.urls)]
+               path("api/v1/", api.urls),
+               path('api/docs', lambda request: redirect('/api/v1/docs', permanent=True)),
+               ]
