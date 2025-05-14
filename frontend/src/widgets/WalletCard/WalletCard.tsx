@@ -25,7 +25,7 @@ export const WalletCard: React.FC<PropsDefault> = ({
     data: state.viewer.data,
   }))
   const dispatch = useDispatch()
-  const { isOpen, open, close } = useModal()
+  const { isOpen, close } = useModal()
 
   const connectWallet = useCallback(async () => {
     try {

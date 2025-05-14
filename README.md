@@ -1,4 +1,4 @@
-### Oort
+# Oort Mini App
 >
 > [!IMPORTANT]
 > First of all, to run the project locally, you will need to fill out `.env` using the `.env.example`
@@ -32,7 +32,7 @@ There are some profiles to separate running.
 > [!NOTE]
 > If you want to run it in production, you can use my images or build your own.
 
-_You can use Docker Swarm or k8s (and translate docker files there), but for a small scale app compose system is enough_
+## You can use Docker Swarm or k8s (and translate docker files there), but for a small scale app compose system is enough
 
 Some server's docker-compose files are:
 
@@ -94,26 +94,29 @@ $ python manage.py createsuperuser
 <http://localhost:8000/api/docs> (redirects to /api/v1/docs)
 <http://localhost:8000/admin/>
 
-# DataHub MiniApp
-
 ## Getting Started (Docker)
 
 ### 1. Clone the Repository
+
 ```sh
 git clone <your-repo-url>
 cd datahub-miniapp
 ```
 
 ### 2. Environment Variables
+
 - Copy `.env.example` to `.env` and fill in any required secrets.
 
 ### 3. Build and Start the Stack
+
 ```sh
 docker-compose up --build
 ```
+
 - This will start the backend, frontend, and database containers.
 
 ### 4. Run Migrations (First Time or After Model Changes)
+
 ```sh
 docker-compose exec backend python manage.py makemigrations
 # (Optional: for specific apps)
@@ -123,31 +126,37 @@ docker-compose exec backend python manage.py migrate
 ```
 
 ### 5. Create a Superuser (for Django Admin)
+
 ```sh
 docker-compose exec backend python manage.py createsuperuser
 ```
 
 ### 6. Access the App
-- **Frontend:** http://localhost:3000
-- **Backend API/Swagger:** http://localhost:8000/api/docs
-- **Django Admin:** http://localhost:8000/admin
+
+- **Frontend:** <http://localhost:3000>
+- **Backend API/Swagger:** <http://localhost:8000/api/docs>
+- **Django Admin:** <http://localhost:8000/admin>
 
 ---
 
 ## Web3 Authentication (How to Test)
 
 ### 1. Generate a Signature
+
 You need:
+
 - `wallet_address`: Your Ethereum wallet address
 - `message`: The message to sign (e.g., `Sign in to DataHub at 2025-05-14T12:00:00Z`)
 - `signature`: The signature of the message, signed by your wallet
 
 #### **MetaMask**
+
 - Open MetaMask, go to "Sign Message" (or use a dApp that lets you sign messages)
 - Enter the message and sign it
 - Copy the resulting signature (should start with `0x` and be 130 hex characters)
 
 #### **Ethers.js (Node.js)**
+
 ```js
 const { ethers } = require("ethers");
 const privateKey = "YOUR_PRIVATE_KEY"; // for testing only!
@@ -159,13 +168,16 @@ wallet.signMessage(message).then(signature => {
 ```
 
 #### **MyCrypto/MyEtherWallet**
+
 - Use the "Sign Message" tool
 - Copy the signature
 
 ### 2. Test the Endpoint
-- Go to http://localhost:8000/api/docs
+
+- Go to <http://localhost:8000/api/docs>
 - Use the `/api/v1/accounts/auth/web3/` endpoint
 - Example request body:
+
 ```json
 {
   "wallet_address": "0xYourWalletAddress",
@@ -177,16 +189,20 @@ wallet.signMessage(message).then(signature => {
 ---
 
 ## Troubleshooting
+
 - **Missing table errors:**
   - Run migrations for all apps:
+
     ```sh
     docker-compose exec backend python manage.py makemigrations
     docker-compose exec backend python manage.py migrate
     ```
+
 - **Signature errors:**
   - Make sure you are sending a 65-byte (130 hex chars) signature, not a hash or private key.
 - **Resetting migrations (if needed):**
   - Danger: This will delete all data!
+
     ```sh
     docker-compose exec backend python manage.py migrate challenges zero
     docker-compose exec backend python manage.py migrate tasks zero
@@ -199,9 +215,11 @@ wallet.signMessage(message).then(signature => {
 ---
 
 ## Notes
+
 - All user authentication and relations are Web3-native (by wallet address).
 - No Telegram logic remains in the backend.
 - For any issues, check logs with:
+
   ```sh
   docker-compose logs backend
   ```
