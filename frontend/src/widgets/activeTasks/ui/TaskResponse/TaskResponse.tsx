@@ -3,7 +3,6 @@ import {createPortal} from "react-dom"
 
 import { ReferralModal } from "@/features/referral"
 
-import { useTelegram } from "@/shared/lib/hooks/useTelegram"
 import { useModal } from "@/shared/ui/BottomSheet"
 import { icons } from "@/shared/assets/icons"
 import { RouterPathes } from "@/shared/lib/types"
@@ -19,11 +18,10 @@ export type TaskResponseProps = {
 const TaskResponseComponent: React.FC<TaskResponseProps> = ({
     award,
 }) => {
-    const { setHeaderColor } = useTelegram()
     const { isOpen, open, close } = useModal()
 
     useEffect(() => {
-        setHeaderColor('#03277e')
+        // setHeaderColor('#03277e')
     }, [])
 
     return createPortal(

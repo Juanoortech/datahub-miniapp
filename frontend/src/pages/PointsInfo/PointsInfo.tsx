@@ -1,13 +1,11 @@
 import {PageLayout} from "@/shared/ui/PageLayout";
 
 import styles from './PointsInfo.module.scss'
-import {CardInfoIconView} from "@/shared/ui/CardInfoIconView";
 import {CardInfoColumn} from "@/shared/ui/CardInfoColumn";
 import {CopyCell} from "@/shared/ui/CopyCell";
 import {useSelector} from "react-redux";
 import {RootState} from "@/app/store";
 import {DownloadCard} from "@/entities/download";
-import {Card} from "@/shared/ui/Card";
 import {CardReward} from "@/shared/ui/CardReward";
 import {useBackButton} from "@/shared/providers";
 import {useEffect} from "react";
@@ -18,7 +16,7 @@ export const PointsInfo = () => {
 
     useEffect(() => {
         show()
-    }, []);
+    }, [show]);
 
     return (
         <PageLayout

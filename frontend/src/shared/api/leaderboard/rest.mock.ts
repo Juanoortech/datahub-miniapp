@@ -8,13 +8,12 @@ export const leaderboardApi: LeaderboardApi = {
 
         function getList(): GetLeaderboardResponse['items'] {
             return Array(15).fill(page).map((page, key) => {
-                const id = (page - 1) * 10 + key
-
+                const walletAddress = `0x${(page - 1).toString().padStart(2, '0')}${key.toString().padStart(2, '0')}0000000000000000000000000000000000000000`;
                 return {
-                    id,
+                    walletAddress,
                     avatar: 'https://dx35vtwkllhj9.cloudfront.net/paramountpictures/avatar-studios/images/quiz/q3.webp',
-                    name: `name ${id}`,
-                    points: 10_000 + id,
+                    name: `name ${walletAddress.slice(0, 8)}`,
+                    points: 10_000 + key,
                 }
             })
         }

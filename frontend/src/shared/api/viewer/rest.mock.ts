@@ -10,12 +10,11 @@ export const viewerApi: ViewerApi = {
         return {
             error: false,
             payload: {
-                id: 1,
+                wallet_address: '0x0000000000000000000000000000000000000000',
                 photo: '',
                 name: 'name',
                 banned: false,
                 balance: 3_000,
-                is_premium: false,
                 referral_code: 'XGHSREW',
                 referral_level: 2,
                 referral_earnings: 10_000,

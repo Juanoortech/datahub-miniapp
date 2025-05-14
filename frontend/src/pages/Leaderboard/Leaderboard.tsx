@@ -3,7 +3,6 @@ import { Skeleton } from './Skeleton'
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/app/store";
 import {isEmptyViewer, viewerModel} from "@/entities/viewer";
-import {useTelegram} from "@/shared/lib/hooks/useTelegram";
 import {useScrollPaginate} from "@/shared/lib/hooks/useScrollPaginate";
 import {leaderboardModel} from "@/entities/leaderboard";
 import {useEffect} from "react";
@@ -32,7 +31,6 @@ export const Leaderboard = () => {
     }))
     const dispatch = useDispatch<AppDispatch>()
 
-    const { setHeaderColor } = useTelegram()
     const { hide } = useBackButton()
     const { ref } = useScrollPaginate({
         hasNextPage,
@@ -45,7 +43,6 @@ export const Leaderboard = () => {
     const isPending = isPendingLeaderBoard || isPendingViewer || isPendingLeaderBoardViewerState
 
     useEffect(() => {
-        setHeaderColor('#03277e')
         hide()
         dispatch(leaderboardModel.thunks.fetch({
             page: 1
@@ -54,11 +51,10 @@ export const Leaderboard = () => {
         if (isNeedFetchViewer) {
             dispatch(viewerModel.thunks.fetch())
         }
-
         return () => {
             dispatch(leaderboardModel.actions.reset())
         }
-    }, [])
+    }, [dispatch, hide, isNeedFetchViewer])
 
     return (
         <div
@@ -66,8 +62,7 @@ export const Leaderboard = () => {
             className={styles.root}
         >
             <TransitionFade>
-                {!isPending && <Content key={'Content'} />}
-                {isPending && <Skeleton key={'Skeleton'} />}
+                {isPending ? <Skeleton /> : <Content />}
             </TransitionFade>
         </div>
     )

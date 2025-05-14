@@ -58,7 +58,7 @@ export const useScrollPaginateWithRef = ({
                 })
             }
         }
-    }, [hasNextPage, page, isPaginating])
+    }, [ref, isPaginating, hasNextPage, fetchNextPage, page])
 
     useEffect(() => {
         if (ref.current) {
@@ -74,7 +74,7 @@ export const useScrollPaginateWithRef = ({
                 onScroll,
             )
         }
-    }, [onScroll])
+    }, [onScroll, ref])
 
     return {
         onScroll,

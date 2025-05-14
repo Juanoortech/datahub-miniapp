@@ -20,27 +20,27 @@ export const LeaderboardList: React.FC<PropsDefault> = ({
     const {
         list,
         isPaginating,
-        viewerId,
+        viewerWalletAddress,
     } = useSelector((state: RootState) => ({
         list: state.leaderboard.list,
         isPaginating: state.leaderboard.isPaginating,
-        viewerId: state.viewer.data.id,
+        viewerWalletAddress: state.viewer.data.walletAddress,
     }))
 
     useEffect(() => {
-        console.log(viewerId)
-    }, [viewerId]);
+        console.log(viewerWalletAddress)
+    }, [viewerWalletAddress]);
 
     return (
         <div className={clsx(styles.root, className)}>
             {list.map((item, key) => (
                 <>
                     <div
-                        key={item.id}
+                        key={item.walletAddress}
                         className={clsx(
                             styles.item,
                             {
-                                [styles['is-viewer']]: item.id === viewerId
+                                [styles['is-viewer']]: item.walletAddress === viewerWalletAddress
                             }
                         )}
                     >
@@ -61,14 +61,14 @@ export const LeaderboardList: React.FC<PropsDefault> = ({
                                     size={20}
                                 />
                             )}
-                            {item.id === viewerId && (
+                            {item.walletAddress === viewerWalletAddress && (
                                 <div className={styles.badge}>You</div>
                             )}
                         </div>
                         <p className={styles.points}>{toFormattedNumber(item.points)}</p>
                     </div>
                     {key !== list.length - 1 && (
-                        <div key={`divider-${item.id}`} className={styles.divider} />
+                        <div key={`divider-${item.walletAddress}`} className={styles.divider} />
                     )}
                 </>
             ))}

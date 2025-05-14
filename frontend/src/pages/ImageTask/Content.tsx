@@ -13,8 +13,6 @@ import { TransitionFade } from "@/shared/ui/TransitionFade"
 import {useBackButton, useGlobalTrigger, useToaster} from "@/shared/providers"
 
 import { Start, Verify, Camera, Info } from './ui'
-import {useTelegram} from "@/shared/lib/hooks/useTelegram";
-import {useNavigate} from "react-router-dom";
 
 enum Step {
     INFO,
@@ -29,7 +27,6 @@ export const Content: React.FC<{
 }> = ({
     id
 }) => {
-    const navigate = useNavigate()
 
     const { pool, completionId } = useSelector((state: RootState) => state.expandTasks)
     const { isSuccess, isError } = useSelector((state: RootState) => state.uploadTaskFile)
@@ -37,7 +34,7 @@ export const Content: React.FC<{
 
     const { trigger } = useGlobalTrigger()
     const { toast } = useToaster()
-    const { show, hide } = useBackButton()
+    const { show } = useBackButton()
 
     const [value, setValue] = useState<File | null>(null)
     const [step, setStep] = useState<Step>(Step.INFO)
@@ -75,13 +72,13 @@ export const Content: React.FC<{
         if (isError) {
             trigger()
         }
-    }, [isError])
+    }, [isError, trigger])
 
     useEffect(() => {
         return () => {
             dispatch(uploadTaskFileModel.actions.reset())
         }
-    }, [])
+    }, [dispatch])
 
     useEffect(() => {
         if (step === Step.CAMERA) {
@@ -91,7 +88,7 @@ export const Content: React.FC<{
         } else {
             show()
         }
-    }, [step]);
+    }, [show, step]);
 
     return (
         <TransitionFade>

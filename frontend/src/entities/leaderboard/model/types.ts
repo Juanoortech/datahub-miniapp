@@ -1,5 +1,5 @@
 export type LeaderBoardItem = {
-    id: number
+    walletAddress: string
     avatar: string
     name: string
     points: number

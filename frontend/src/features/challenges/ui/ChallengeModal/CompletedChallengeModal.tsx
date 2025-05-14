@@ -5,7 +5,6 @@ import {Challenge} from "@/entities/challenges/model/types"
 import {ChallengeStatus, ChallengeType} from "@/shared/api/enums"
 
 import {ChallengeModalBase} from './ChallengeModalBase'
-import {useTelegram} from "@/shared/lib/hooks/useTelegram";
 
 export type CompletedChallengeModalProps = {
     isOpen: boolean
@@ -18,16 +17,14 @@ export const CompletedChallengeModal: React.FC<CompletedChallengeModalProps> = (
     setIsOpen,
     challenge
 }) => {
-    const { openLink, openTelegramLink } = useTelegram()
-
     const onClick = useCallback(() => {
         if (challenge.type === ChallengeType.IMITATION && challenge.link) {
-            openLink(challenge.link)
+            window.open(challenge.link, '_blank')
         } else if (challenge.type === ChallengeType.REAL && challenge.channel) {
-            openTelegramLink(`https://t.me/${challenge.channel.uri.replace('@', '')}`)
+            window.open(`https://t.me/${challenge.channel.uri.replace('@', '')}`, '_blank')
         }
         setIsOpen(false)
-    }, [challenge])
+    }, [challenge.channel, challenge.link, challenge.type, setIsOpen])
 
     return (
         <ChallengeModalBase

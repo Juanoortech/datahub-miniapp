@@ -5,7 +5,6 @@ import {downloadModel} from "@/entities/download";
 import {Button} from "@/shared/ui";
 import {CopyCell} from "@/shared/ui/CopyCell";
 import {Modal} from "@/shared/ui/Modal";
-import {useTelegram} from "@/shared/lib/hooks/useTelegram";
 import {useDownloadFile} from "@/shared/lib/hooks/useDownload";
 
 import styles from "./ModalDownload.module.scss";
@@ -34,14 +33,13 @@ export const ModalDownload: React.FC<ModalDownloadProps> = ({
     }))
     const dispatch = useDispatch<AppDispatch>()
 
-    const { openLink } = useTelegram()
     const { downloadFile } = useDownloadFile()
 
     useEffect(() => {
         if (!ios || !android || !apk) {
             dispatch(downloadModel.thunks.fetch())
         }
-    }, [isOpen]);
+    }, [android, apk, dispatch, ios, isOpen]);
 
     return (
         <Modal
@@ -57,7 +55,7 @@ export const ModalDownload: React.FC<ModalDownloadProps> = ({
                     icon={'apple-filled'}
                     isWide={true}
                     isLoading={isPending || !ios}
-                    onClick={() => openLink(ios)}
+                    onClick={() => window.open(ios)}
                 >
                     Download for iOS
                 </Button>
@@ -67,7 +65,7 @@ export const ModalDownload: React.FC<ModalDownloadProps> = ({
                     icon={'play-market-filled'}
                     isWide={true}
                     isLoading={isPending || !android}
-                    onClick={() => openLink(android)}
+                    onClick={() => window.open(android)}
                 >
                     Download for Android
                 </Button>

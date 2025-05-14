@@ -20,16 +20,15 @@ const initialState: {
     isPending: boolean
 } = {
     data: {
-        id: -1,
+        walletAddress: '',
         photo: '',
         name: '',
         isBanned: false,
         balance: 0,
-        isPremium: false,
+        referralsBalance: 0,
         referralCode: '',
         referralLevel: 0,
         leaderboardBonus: 0,
-        referralsBalance: 0,
         story: '',
         isWalletConnect: false,
         walletConnectCode: '',
@@ -88,5 +87,5 @@ function toDomain(data: GetViewerResponse): Viewer {
 }
 
 export function isEmptyViewer(data: Viewer) {
-    return data.id === initialState.data.id
+    return !data.walletAddress
 }

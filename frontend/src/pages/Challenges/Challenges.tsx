@@ -2,7 +2,6 @@ import {useEffect, useState} from "react"
 
 import {ActiveChallengesList, CompletedChallengesList} from "@/widgets/challenges"
 
-import {useTelegram} from "@/shared/lib/hooks/useTelegram"
 import {images} from "@/shared/assets/images"
 import {TabsCardLayout} from "@/shared/ui/TabsCardLayout"
 
@@ -10,13 +9,11 @@ import styles from './Challenges.module.scss'
 import {useBackButton} from "@/shared/providers";
 
 export const Challenges = () => {
-    const { setHeaderColor } = useTelegram()
     const { hide } = useBackButton()
 
     const [state, setState] = useState(0)
 
     useEffect(() => {
-        setHeaderColor('#f7f7f8')
         hide()
     }, [])
 

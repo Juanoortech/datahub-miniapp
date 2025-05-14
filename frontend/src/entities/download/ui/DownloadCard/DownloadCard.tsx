@@ -8,7 +8,6 @@ import {downloadModel} from "@/entities/download"
 import {PropsDefault} from "@/shared/lib/types"
 import {Card} from "@/shared/ui/Card"
 import {Button} from "@/shared/ui"
-import {useTelegram} from "@/shared/lib/hooks/useTelegram"
 import {useDownloadFile} from "@/shared/lib/hooks/useDownload"
 
 import styles from './DownloadCard.module.scss'
@@ -24,14 +23,13 @@ export const DownloadCard: React.FC<PropsDefault> = ({
     } = useSelector((state: RootState) => state.download)
     const dispatch = useDispatch<AppDispatch>()
 
-    const { openLink } = useTelegram()
     const { downloadFile } = useDownloadFile()
 
     useEffect(() => {
         if (!ios || !android || !apk) {
             dispatch(downloadModel.thunks.fetch())
         }
-    }, [ios, android, apk]);
+    }, [ios, android, apk, dispatch]);
 
     return (
         <Card
@@ -48,7 +46,7 @@ export const DownloadCard: React.FC<PropsDefault> = ({
                     icon={'apple-filled'}
                     isWide={true}
                     isLoading={isPending || !ios}
-                    onClick={() => openLink(ios)}
+                    onClick={() => window.open(ios)}
                 >
                     Download for iOS
                 </Button>
@@ -58,7 +56,7 @@ export const DownloadCard: React.FC<PropsDefault> = ({
                     icon={'play-market-filled'}
                     isWide={true}
                     isLoading={isPending || !android}
-                    onClick={() => openLink(android)}
+                    onClick={() => window.open(android)}
                 >
                     Download for Android
                 </Button>

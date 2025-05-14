@@ -16,7 +16,6 @@ import { HistoryTaskFilter } from '@/features/tasks/HistoryTaskFilter'
 import {ValidationFilter} from "@/features/validation"
 
 import { images } from '@/shared/assets/images'
-import { useTelegram } from '@/shared/lib/hooks/useTelegram'
 import { TabsCardLayout } from '@/shared/ui/TabsCardLayout'
 import { RouterPathes } from '@/shared/lib/types'
 import {useBackButton} from "@/shared/providers"
@@ -36,13 +35,11 @@ export const Main = () => {
     }))
     const dispatch = useDispatch()
 
-    const { setHeaderColor } = useTelegram()
     const { hide } = useBackButton()
 
     const ref = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
-        setHeaderColor('#f7f7f8')
         hide()
     }, [])
 

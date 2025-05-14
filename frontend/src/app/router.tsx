@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Route, Routes, useLocation, useNavigate} from "react-router-dom"
+import {Route, Routes, useLocation} from "react-router-dom"
 
 import { Main } from "@/pages/Main/Main"
 import { ImageTask } from "@/pages/ImageTask/ImageTask"
@@ -15,15 +15,7 @@ import {PointsInfo} from "@/pages/PointsInfo/PointsInfo"
 import {OnBoarding} from "@/pages/OnBoarding/OnBoarding"
 
 import { RouterPathes } from "@/shared/lib/types"
-import {useTelegram} from "@/shared/lib/hooks/useTelegram"
 
-const RootPages = [
-    RouterPathes.MAIN,
-    RouterPathes.REFERRALS,
-    RouterPathes.LEADERBOARD,
-    RouterPathes.CHALLENGES,
-    RouterPathes.ON_BOARDING
-] as string[]
 
 export const RouterView = React.memo(() => {
     const location = useLocation()

@@ -1,6 +1,3 @@
-import {tokenApi} from "@/shared/api/token"
-import {telegramWindow} from "@/shared/lib/hooks/useTelegram"
-import {IS_LOCAL} from "@/shared/app-state"
 
 export const TOKEN_STORAGE = 'jwt-token'
 

@@ -1,6 +1,4 @@
 import React, {createContext, useContext} from "react";
-import {useTelegram} from "@/shared/lib/hooks/useTelegram";
-import {useNavigate} from "react-router-dom";
 
 type Context = {
     hide: () => void
@@ -15,25 +13,9 @@ const backButtonProviderContext = createContext<Context>({
 export const BackButtonProvider: React.FC<React.PropsWithChildren> = ({
     children
 }) => {
-    const navigate = useNavigate()
-    const { BackButton } = useTelegram()
-
-    function hide() {
-        BackButton.hide()
-    }
-
-    function goBack() {
-        navigate(-1)
-    }
-
+    function hide() {}
     function show(cb?: () => void) {
-        BackButton.show()
-        if (cb) {
-            BackButton.offClick(goBack)
-            BackButton.onClick(cb)
-        } else {
-            BackButton.onClick(goBack)
-        }
+        // No-op for custom callback or default back
     }
 
     return (
@@ -48,4 +30,4 @@ export const BackButtonProvider: React.FC<React.PropsWithChildren> = ({
     )
 }
 
-export const useBackButton = () => useContext(backButtonProviderContext)
+export const useBackButton = () => useContext(backButtonProviderContext);

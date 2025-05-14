@@ -104,7 +104,7 @@ export const useTimer = (
                 setCurrTime(prevState => prevState + 1000)
             }
         }, 1000)
-    }, [startTime, type, id])
+    }, [startTime, type, id, currTime])
 
     return {
         hms,

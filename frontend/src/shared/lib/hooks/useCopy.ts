@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import {useToaster} from "@/shared/providers";
 
 type CopiedValue = string | null
@@ -6,7 +6,7 @@ type CopiedValue = string | null
 type CopyFn = (text: string) => boolean
 
 export function useCopyToClipboard(): [CopiedValue, CopyFn] {
-    const [copiedText, setCopiedText] = useState<CopiedValue>(null)
+    const [copiedText] = useState<CopiedValue>(null)
     const { toast } = useToaster()
 
     // const copy: CopyFn = useCallback(async text => {
@@ -35,7 +35,6 @@ export function useCopyToClipboard(): [CopiedValue, CopyFn] {
     // }, [])
     function copy(text: string): boolean {
         try {
-            const prevState = document.body.style.getPropertyValue('pointer-events')
 
             const textarea = document.createElement('textarea')
             document.body.style.setProperty('pointer-events', 'all')

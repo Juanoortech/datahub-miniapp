@@ -24,7 +24,6 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 USE_TZ = True
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-TELEGRAM_ENDPOINT = f"""https://api.telegram.org/bot{os.getenv("TELEGRAM_TOKEN")}"""
 
 ALLOWED_HOSTS = [
     "localhost",

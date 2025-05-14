@@ -14,11 +14,8 @@ CommaList = Annotated[
 
 
 class UserInit(Schema):
-    id: int
-    name: str
-    username: Optional[str] = None
-    is_premium: bool = False
-    language_code: str = "en"
+    wallet_address: str
+    name: Optional[str] = None
     referral_code: Optional[uuid.UUID] = None
 
 
@@ -51,26 +48,6 @@ class LeaderBoardUserInfoSchema(Schema):
     viewer_points: int
     viewer_place: int
     viewer_bonus: Optional[float] = None
-
-
-class TGUser(Schema):
-    id: int
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    username: Optional[str] = None
-    language_code: Optional[str] = None
-    is_premium: Optional[bool] = None
-    allows_write_to_pm: bool
-    photo_url: Optional[str] = None
-
-
-class UserTokenIn(Schema):
-    init_data: str = Field(
-        examples=[
-            "query_id=AAFGtpsbAAAAAEa2mxvOzSfg&user=%7B%22id%22%3A463189574%2C%22first_name%22%3A%22yasuhiro.%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22yasuhiro_h%22%2C%22language_code%22%3A%22ru%22%2C%22is_premium%22%3Atrue%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1731360200&hash=2528e6d5644eaac86f0689a4dd22ceb640392e76944e4eb5dbba9a77db175e98",
-        ],
-        description="Should be taken from TG, usually goes with every request in mini app. Must be a safe version to parse successfully!",
-    )
 
 
 class UserTokenOut(Schema):

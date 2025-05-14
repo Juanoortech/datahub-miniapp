@@ -2,7 +2,7 @@ import {ResponseDefault} from "@/shared/lib/api/createRequest";
 
 export type GetLeaderboardResponse = {
     items: {
-        id: number
+        walletAddress: string
         avatar: string
         name: string
         points: number

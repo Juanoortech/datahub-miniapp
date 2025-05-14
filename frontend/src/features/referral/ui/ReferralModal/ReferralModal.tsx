@@ -10,8 +10,6 @@ import { TransitionFade } from "@/shared/ui/TransitionFade"
 import { SkeletonWrapper } from "@/shared/ui/SkeletonWrapper"
 import { ButtonSkeleton } from "@/shared/ui/Button/ButtonSkeleton"
 import { Button } from "@/shared/ui"
-import { useTelegram } from "@/shared/lib/hooks/useTelegram"
-import {BOT_LINK} from "@/shared/app-state"
 import {CopyCell} from "@/shared/ui/CopyCell"
 import {useToaster} from "@/shared/providers"
 
@@ -37,7 +35,6 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
     }))
     const dispatch = useDispatch<AppDispatch>()
 
-    const { shareLink, shareToStory } = useTelegram()
     const { toast } = useToaster()
 
     const ref = useRef<HTMLDivElement | null>(null)
@@ -78,7 +75,7 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
         if (isOpen && isNeedFetchViewer) {
             dispatch(viewerModel.thunks.fetch())
         }
-    }, [isOpen, isNeedFetchViewer]);
+    }, [isOpen, isNeedFetchViewer, dispatch]);
 
     return (
         <BottomSheet
@@ -106,7 +103,7 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
                     <div ref={ref} key={'Content'}>
                         <CopyCell
                             label={'Your Referral Link'}
-                            value={`${BOT_LINK}?startapp=${data.referralCode}`}
+                            value={`https://app.oortech.com?startapp=${data.referralCode}`}
                             showedValue={data.referralCode}
                             onCopy={onCopy}
                         />
@@ -115,9 +112,6 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
                             isWide={true}
                             view={'surface'}
                             icon={'link'}
-                            onClick={() => shareLink(
-                                `${BOT_LINK}?startapp=${data.referralCode}`
-                            )}
                         >
                             Share Link
                         </Button>
@@ -126,15 +120,6 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
                             isWide={true}
                             view={'surface'}
                             icon={'add'}
-                            onClick={() => shareToStory(
-                                data.story,
-                                {
-                                    widget_link: {
-                                        url: `${BOT_LINK}?startapp=${data.referralCode}`,
-                                        name: 'referral link',
-                                    }
-                                }
-                            )}
                         >
                             Share in Stories
                         </Button>

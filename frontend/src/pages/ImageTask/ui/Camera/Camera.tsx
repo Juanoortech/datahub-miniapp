@@ -2,8 +2,6 @@ import React, {useEffect, useRef, useState} from "react"
 import { createPortal } from "react-dom"
 import Webcam from "react-webcam"
 
-import {useTelegram} from "@/shared/lib/hooks/useTelegram"
-
 import styles from './Camera.module.scss'
 import {ButtonIcon} from "@/shared/ui/ButtonIcon";
 
@@ -18,8 +16,6 @@ export const Camera: React.FC<CameraProps> = ({
     onUserMediaError,
     onBack
 }) => {
-    const { BackButton } = useTelegram()
-
     const webcamRef = useRef<Webcam | null>(null);
 
     const [isLoading, setIsLoading] = useState(true)
@@ -45,8 +41,7 @@ export const Camera: React.FC<CameraProps> = ({
     }
 
     useEffect(() => {
-        BackButton.onClick(onBack)
-        BackButton.show()
+        // Replace BackButton logic with no-op or browser back navigation
     }, []);
 
     return createPortal(

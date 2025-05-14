@@ -8,7 +8,6 @@ import {Challenge} from "@/entities/challenges/model/types"
 import {challengesInfoModel} from "@/entities/challenges"
 
 import {ChallengeStatus, ChallengeType} from "@/shared/api/enums"
-import {useTelegram} from "@/shared/lib/hooks/useTelegram"
 import {useGlobalTrigger, useToaster} from "@/shared/providers"
 
 import {ChallengeModalBase} from './ChallengeModalBase'
@@ -43,7 +42,6 @@ export const ActiveChallengeModal: React.FC<ActiveChallengeModalProps> = ({
 
     const { trigger } = useGlobalTrigger()
     const { toast } = useToaster()
-    const { openLink, openTelegramLink } = useTelegram()
 
     const [isNotClaimed, setIsNotClaimed] = useState(false)
     const [isImitationEnded, setIsImitationEnded] = useState(false)
@@ -84,7 +82,7 @@ export const ActiveChallengeModal: React.FC<ActiveChallengeModalProps> = ({
                     : challenge.actionText,
             }
         }
-    }, [isPending, challengeInfo, isNotClaimed, isImitationEnded])
+    }, [isPending, challengeInfo, isImitationEnded, isNotClaimed, challenge.status, challenge.title, challenge.award, challenge.moderationTime, challenge.actionText])
 
     const onClick = useCallback(async () => {
         if (challengeData.status === ChallengeStatus.NOT_STARTED) {
@@ -95,20 +93,20 @@ export const ActiveChallengeModal: React.FC<ActiveChallengeModalProps> = ({
         }
         if (challengeData.status === ChallengeStatus.CLAIMED || isNotClaimed) {
             if (challenge.type === ChallengeType.IMITATION && challenge.link) {
-                openLink(challenge.link)
+                window.open(challenge.link, '_blank')
             } else if (challenge.type === ChallengeType.REAL && challenge.channel) {
-                openTelegramLink(`https://t.me/${challenge.channel.uri.replace('@', '')}`)
+                window.open(`https://t.me/${challenge.channel.uri.replace('@', '')}`, '_blank')
             }
             setIsOpen(false)
             setIsNotClaimed(false)
         }
-    }, [challengeData, challenge, isNotClaimed])
+    }, [challengeData.status, isNotClaimed, dispatch, challenge, setIsOpen])
 
     useEffect(() => {
         if (isOpen) {
             dispatch(challengesInfoModel.thunks.fetch(challenge))
         }
-    }, [isOpen])
+    }, [challenge, dispatch, isOpen])
 
     useEffect(() => {
         if (startState === 'success') {
@@ -116,9 +114,9 @@ export const ActiveChallengeModal: React.FC<ActiveChallengeModalProps> = ({
                 setIsOpen(false)
                 console.log('go via link')
                 if (challenge.type === ChallengeType.IMITATION && challenge.link) {
-                    openLink(challenge.link)
+                    window.open(challenge.link, '_blank')
                 } else if (challenge.type === ChallengeType.REAL && challenge.channel) {
-                    openTelegramLink(`https://t.me/${challenge.channel.uri.replace('@', '')}`)
+                    window.open(`https://t.me/${challenge.channel.uri.replace('@', '')}`, '_blank')
                 }
                 dispatch(startModel.actions.reset())
             }, 100)
@@ -126,7 +124,7 @@ export const ActiveChallengeModal: React.FC<ActiveChallengeModalProps> = ({
             trigger()
             dispatch(startModel.actions.reset())
         }
-    }, [startState]);
+    }, [challenge.channel, challenge.link, challenge.type, dispatch, setIsOpen, startState, trigger]);
 
     useEffect(() => {
         console.log(claimAwardState)
@@ -151,7 +149,7 @@ export const ActiveChallengeModal: React.FC<ActiveChallengeModalProps> = ({
             setIsNotClaimed(true)
             dispatch(claimedAwardModel.actions.reset())
         }
-    }, [claimAwardState]);
+    }, [claimAwardState, dispatch, setIsOpen, toast]);
 
     return (
         <ChallengeModalBase

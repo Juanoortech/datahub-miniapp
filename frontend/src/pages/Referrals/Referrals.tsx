@@ -6,7 +6,6 @@ import {AppDispatch, RootState} from "@/app/store"
 import {isEmptyViewer, viewerModel} from "@/entities/viewer";
 import {referralsModel} from "@/entities/referrals";
 
-import { useTelegram } from "@/shared/lib/hooks/useTelegram";
 import {PageLayout} from "@/shared/ui/PageLayout";
 
 import { Content } from './Content'
@@ -32,7 +31,6 @@ export const Referrals = () => {
     }))
     const dispatch = useDispatch<AppDispatch>()
 
-    const { setHeaderColor } = useTelegram()
     const { ref } = useScrollPaginate({
         hasNextPage,
         page,
@@ -43,7 +41,6 @@ export const Referrals = () => {
     const { hide } = useBackButton()
 
     useEffect(() => {
-        setHeaderColor('#f7f7f8')
         hide()
         dispatch(referralsModel.thunks.fetch({
             page: 1
@@ -55,7 +52,7 @@ export const Referrals = () => {
         return () => {
             dispatch(referralsModel.actions.reset())
         }
-    }, [])
+    }, [dispatch, hide, isNeedFetchViewer])
 
     return (
         <PageLayout

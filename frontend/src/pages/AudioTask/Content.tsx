@@ -54,13 +54,13 @@ export const Content: React.FC<{
         if (isError) {
             trigger()
         }
-    }, [isError])
+    }, [isError, trigger])
 
     useEffect(() => {
         return () => {
             dispatch(uploadTaskFileModel.actions.reset())
         }
-    }, []);
+    }, [dispatch]);
 
     return (
         <TransitionFade>

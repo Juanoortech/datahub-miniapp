@@ -6,7 +6,6 @@ pillow==11.0.0
 redis==5.2.0
 aioboto3==13.2.0
 pyjwt==2.9.0
-aiogram==3.14.0
 uvicorn==0.32.0
 django_cors_headers==4.6.0
 django-storages==1.14.4

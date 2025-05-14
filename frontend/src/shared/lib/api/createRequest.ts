@@ -1,5 +1,4 @@
 import {tokenModel} from "@/shared/model";
-import {IS_LOCAL} from "@/shared/app-state";
 
 export type SuccessResponse<T> = {
     error: false,
@@ -35,7 +34,8 @@ export async function createRequest<T>({
         console.log(token)
 
         if (!token && withAuth) {
-            const { error } = await tokenModel.updateToken()
+            // TODO: Replace with actual wallet address and signature from user context
+            const { error } = await tokenModel.updateToken('', '')
 
             if (!error) {
                 return createRequest<T>({
@@ -45,7 +45,7 @@ export async function createRequest<T>({
             }
         }
 
-        const url = `${urlMap[IS_LOCAL]}${data.url}`
+        const url = `${urlMap['prod']}${data.url}`
 
         const response = await fetch(
             url,
@@ -76,13 +76,9 @@ export async function createRequest<T>({
         }
 
         if (response.status === 401) {
-            const { error } = await tokenModel.updateToken()
-
-            if (!error) {
-                return createRequest<T>({
-                    withAuth: true,
-                    ...data,
-                })
+            return {
+                error: true,
+                payload: null
             }
         }
 

@@ -1,7 +1,7 @@
 import React, { useCallback } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { ethers } from "ethers"
-import { Web3Modal } from "web3modal"
+import Web3Modal from "web3modal"
 
 import { RootState } from "@/app/store"
 import { PropsDefault } from "@/shared/lib/types"
@@ -45,7 +45,7 @@ export const WalletCard: React.FC<PropsDefault> = ({
       })
       if (response.ok) {
         // Optionally store JWT, update Redux, etc.
-        dispatch(viewerModel.thunks.fetch())
+        dispatch(viewerModel.thunks.fetch() as any)
       } else {
         alert('Authentication failed')
       }

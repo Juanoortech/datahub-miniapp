@@ -14,7 +14,7 @@ export const AudioTask = () => {
 
     useEffect(() => {
         show()
-    }, []);
+    }, [show]);
 
     return (
         <TaskLayout

@@ -7,7 +7,6 @@ import { AppDispatch, RootState } from "@/app/store"
 import { expandTasksModel } from "@/entities/tasks"
 
 import { images } from "@/shared/assets/images"
-import { useTelegram } from "@/shared/lib/hooks/useTelegram"
 import { TransitionFade } from "@/shared/ui/TransitionFade"
 
 import styles from './TaskLayout.module.scss'
@@ -26,10 +25,7 @@ export const TaskLayout: React.FC<TaskLayoutProps> = ({
     const { pool, completionId, isPending } = useSelector((state: RootState) => state.expandTasks)
     const dispatch = useDispatch<AppDispatch>()
 
-    const { setHeaderColor } = useTelegram()
-
     useEffect(() => {
-        setHeaderColor('#f7f7f8')
         dispatch(expandTasksModel.thunks.fetchExpandTask({
             id: Number(params.id),
             completionId: Number(completionId),
@@ -39,7 +35,7 @@ export const TaskLayout: React.FC<TaskLayoutProps> = ({
         return () => {
             dispatch(expandTasksModel.actions.reset())
         }
-    }, [])
+    }, [completionId, dispatch, params.id, pool])
 
     return (
         <div className={styles.root}>

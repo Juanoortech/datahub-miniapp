@@ -3,10 +3,6 @@ import jwt
 import logging
 from datetime import datetime, timedelta, timezone
 
-from aiogram.utils.web_app import (
-    safe_parse_webapp_init_data,
-    WebAppInitData,
-)
 from asgiref.sync import sync_to_async
 from django.db.models import QuerySet
 from ninja import Router, Query
@@ -23,18 +19,6 @@ from eth_account.messages import encode_defunct
 from eth_account import Account
 
 router = Router()
-
-
-async def validate(init_data, token) -> Optional[WebAppInitData]:
-    data = None
-    # if not settings.DEBUG:
-    try:
-        data = safe_parse_webapp_init_data(token=token, init_data=init_data)
-    except ValueError as ex:
-        logging.error(ex.__str__())
-    # else:
-    #     data = init_data
-    return data
 
 
 async def authenticate(request: WSGIRequest | ASGIRequest):
@@ -104,12 +88,9 @@ async def me(request: WSGIRequest | ASGIRequest):
 )
 async def create_user(request: WSGIRequest | ASGIRequest, payload: UserInit):
     new_user: User
-    new_user, created = await User.objects.select_related("referral_user").aget_or_create(id=payload.id)
-    new_user.name = payload.name
-    new_user.tg_username = payload.username
-    new_user.is_premium = payload.is_premium
-    new_user.language_code = payload.language_code
-
+    new_user, created = await User.objects.select_related("referral_user").aget_or_create(wallet_address=payload.wallet_address)
+    if payload.name:
+        new_user.name = payload.name
     already_has_referral = new_user.referral_user
     if payload.referral_code and not already_has_referral:
         inviter: QuerySet = User.objects.filter(
@@ -123,70 +104,8 @@ async def create_user(request: WSGIRequest | ASGIRequest, payload: UserInit):
                 await new_user.asave()
                 await add_initial_bonus(inviter=inviter, from_user=new_user)
                 await update_ref_level(inviter)
-
     await new_user.asave()
     return 200, new_user
-
-
-@router.post(
-    "/token/",
-    response={200: UserTokenOut, 400: DetailOut},
-    summary="Create a new token",
-)
-async def retrieve_jwt_token(request: WSGIRequest | ASGIRequest, payload: UserTokenIn):
-    """
-    Creates a new token, updates a user if exists, create a new one otherwise\n
-    """
-    safe_init_data = await validate(
-        init_data=payload.init_data, token=os.getenv("TELEGRAM_TOKEN")
-    )
-    logging.error(safe_init_data)
-    if not safe_init_data:
-        return 400, {"detail": "InitData validation error"}
-
-    new_user: User
-    new_user, created = await User.objects.select_related("referral_user").aget_or_create(id=safe_init_data.user.id)
-
-    name = f"{safe_init_data.user.first_name} {safe_init_data.user.last_name if safe_init_data.user.last_name else ''}"
-    username = safe_init_data.user.username
-    photo = safe_init_data.user.photo_url
-
-    if safe_init_data.user.is_premium:
-        new_user.is_premium = safe_init_data.user.is_premium
-    if safe_init_data.user.language_code:
-        new_user.language_code = safe_init_data.user.language_code
-    if new_user.name != name:
-        new_user.name = name
-    if new_user.tg_username != username:
-        new_user.tg_username = username
-    if photo and new_user.photo != photo:
-        new_user.photo = photo
-
-    already_has_referral = new_user.referral_user
-    if safe_init_data.start_param and not already_has_referral:
-        inviter: QuerySet = User.objects.filter(
-            referral_code=safe_init_data.start_param
-        )
-
-        if await inviter.aexists():
-            inviter: User = await inviter.afirst()
-            if inviter != new_user:
-                new_user.referral_user = inviter
-                await new_user.asave()
-                await add_initial_bonus(inviter=inviter, from_user=new_user)
-                await update_ref_level(inviter)
-            else:
-                pass
-                # return 400, {"detail": "User cant be a referral for himself"}
-    await new_user.asave()
-
-    payload = {
-        "exp": datetime.now(timezone.utc)
-               + timedelta(seconds=900),
-        "user": new_user.id,
-    }
-    _token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
-    return 200, {"token": _token}
 
 
 @router.post(

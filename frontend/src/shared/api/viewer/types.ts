@@ -6,7 +6,6 @@ export type GetViewerResponse = {
     name: string,
     banned: boolean,
     balance: number,
-    is_premium: boolean,
     referral_code: string,
     referral_level: number,
     referral_earnings: number,

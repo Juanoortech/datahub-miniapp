@@ -115,7 +115,10 @@ export const leaderboardModel = {
 
 function toDomain(data: GetLeaderboardResponse): LeaderBoardItem[] {
     return data.items.map(item => ({
-        ...item
+        walletAddress: item.walletAddress,
+        avatar: item.avatar,
+        name: item.name,
+        points: item.points,
     }))
 }
 
