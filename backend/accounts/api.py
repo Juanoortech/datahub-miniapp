@@ -66,6 +66,24 @@ async def add_initial_bonus(inviter: User, from_user: User):
     )
 
 
+def verify_signature(wallet_address: str, signature: str, message: str) -> bool:
+    try:
+        msg = encode_defunct(text=message)
+        recovered_address = Account.recover_message(msg, signature=signature)
+        return recovered_address.lower() == wallet_address.lower()
+    except Exception:
+        return False
+
+
+def generate_jwt(user: User) -> str:
+    payload = {
+        "user": user.wallet_address,
+        "exp": datetime.utcnow() + timedelta(days=7),
+    }
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+    return token
+
+
 @router.get(
     "/",
     auth=authenticate,
@@ -87,6 +105,9 @@ async def me(request: WSGIRequest | ASGIRequest):
     summary="Create a new user"
 )
 async def create_user(request: WSGIRequest | ASGIRequest, payload: UserInit):
+    # Verify signature before creating user
+    if not verify_signature(payload.wallet_address, payload.signature, payload.message):
+        return 400, {"detail": "Invalid signature. You must prove ownership of the address."}
     new_user: User
     new_user, created = await User.objects.select_related("referral_user").aget_or_create(wallet_address=payload.wallet_address)
     if payload.name:
@@ -260,14 +281,15 @@ async def withdraw_points(request: WSGIRequest | ASGIRequest, data: WithdrawSche
 
 @router.post(
     "/auth/web3/",
-    summary="Authenticate user via Web3 signature",
+    response={200: UserTokenOut, 400: DetailOut},
+    summary="Authenticate user via Web3 signature and get JWT",
 )
 async def authenticate_web3(request: WSGIRequest | ASGIRequest, data: SignatureVerifyIn):
     # Verify the signature using eth-account
-    message = encode_defunct(text=data.message)
-    recovered_address = Account.recover_message(message, signature=data.signature)
-    if recovered_address.lower() != data.wallet_address.lower():
+    if not verify_signature(data.wallet_address, data.signature, data.message):
         return 400, {"detail": "Invalid signature"}
-    # Issue JWT or session token here
-    # ...
-    return 200, {"wallet_address": data.wallet_address}
+    # Get or create the user
+    user, _ = await User.objects.aget_or_create(wallet_address=data.wallet_address)
+    # Issue JWT
+    token = generate_jwt(user)
+    return 200, {"token": token}

@@ -17,6 +17,8 @@ class UserInit(Schema):
     wallet_address: str
     name: Optional[str] = None
     referral_code: Optional[uuid.UUID] = None
+    signature: str
+    message: str
 
 
 class UserOut(Schema):
