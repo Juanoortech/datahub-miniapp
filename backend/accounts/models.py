@@ -76,7 +76,7 @@ class User(models.Model):
     async def get_rank(self) -> int:
         rank = await User.objects.filter(
             models.Q(balance__gt=self.balance) |
-            models.Q(balance=self.balance, id__lt=self.id)
+            models.Q(balance=self.balance, wallet_address__lt=self.wallet_address)
         ).acount()
         return rank + 1
 

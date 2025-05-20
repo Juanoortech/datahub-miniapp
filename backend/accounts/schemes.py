@@ -40,7 +40,7 @@ class ReferralListUserOut(Schema):
 
 
 class LeaderBoardUserSchema(Schema):
-    id: int
+    id: str
     avatar: Optional[str] = None
     name: str
     points: int
@@ -80,17 +80,17 @@ class ConnectWalletSchemaIn(Schema):
 
 
 class ConnectWalletSchemaOut(Schema):
-    user_id: int
+    wallet_address: str
     balance: int
 
 
 class WithdrawWalletSchemaOut(Schema):
-    user_id: int
+    wallet_address: str
     balance: int
 
 
 class WithdrawSchema(Schema):
-    user_ids: List[int]
+    wallet_addresses: List[str]
 
 
 class DetailOut(Schema):

@@ -151,7 +151,7 @@ class CompletionForValidationAdmin(admin.ModelAdmin):
             completion.status = Status.ACCEPTED
             completion.save()
             validators_to_reward = rate_records.filter(score__gte=3).values_list("validator", flat=True)
-            self._reward_users(completion=completion, user_ids=validators_to_reward, main_user=completion.user.id)
+            self._reward_users(completion=completion, user_ids=validators_to_reward, main_user=completion.user.wallet_address)
         else:
             completion.status = Status.DECLINED
             completion.save()
@@ -173,23 +173,23 @@ class CompletionForValidationAdmin(admin.ModelAdmin):
         user.save()
         transaction.save()
 
-    def _reward_users(self, completion, user_ids, main_user: Optional[int] = None):
+    def _reward_users(self, completion, user_ids, main_user: Optional[str] = None):
         if main_user:
-            main_user = User.objects.get(id=main_user)
+            main_user = User.objects.get(wallet_address=main_user)
             task_reward = completion.task.reward
             calculated_reward_with_bonus = main_user.calculate_bonus(task_reward)
             self.transaction_creation_and_adding(main_user, calculated_reward_with_bonus, DepositType.TASK)
             if main_user.referral_user is not None:
                 referral_reward = calculated_reward_with_bonus * (0.05 * main_user.referral_user.referral_level)
                 self.transaction_creation_and_adding(main_user.referral_user, referral_reward, DepositType.REFERRAL,
-                                                     from_user=main_user)
+                                                     from_user=main_user.wallet_address)
 
-        for user in User.objects.filter(id__in=user_ids):
+        for user in User.objects.filter(wallet_address__in=user_ids):
             self.transaction_creation_and_adding(user, completion.task.validation_reward, DepositType.VALIDATION)
             if user.referral_user is not None:
                 referral_reward = completion.task.validation_reward * (0.05 * user.referral_user.referral_level)
                 self.transaction_creation_and_adding(user.referral_user, referral_reward, DepositType.REFERRAL,
-                                                     from_user=user)
+                                                     from_user=user.wallet_address)
 
     def _move_file(self, file_obj, destination_folder):
         s3_client = boto3.client(

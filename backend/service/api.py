@@ -2,16 +2,15 @@ from django.core.handlers.asgi import ASGIRequest
 from django.core.handlers.wsgi import WSGIRequest
 from ninja import Router, Query
 
-from accounts.api import authenticate
 from service.models import AppLinks
 from service.schemes import LinksSchema, DetailOut
 
 router = Router()
 
+# All endpoints now use global authentication
 
 @router.get(
     "/app-links/",
-    auth=authenticate,
     response={200: LinksSchema, 404: DetailOut},
     summary="Get links",
 )

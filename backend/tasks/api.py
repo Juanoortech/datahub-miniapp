@@ -16,7 +16,6 @@ from django.utils import timezone
 from ninja import Router, Query
 from ninja.pagination import paginate
 
-from accounts.api import authenticate
 from accounts.models import User, Transaction, DepositType, TransactionType, TransactionStatus
 from accounts.pagination import MyPaginator
 from core import settings
@@ -41,21 +40,23 @@ router = Router()
 
 @router.post(
     "/completions/",
-    auth=authenticate,
-    response={200: CompletionOut, 400: DetailOut},
+    response={200: CompletionOut, 400: DetailOut, 404: DetailOut},
     summary="Create empty completion",
 )
 async def start_completion(request: WSGIRequest | ASGIRequest, data: CompletionStartIn):
     try:
-        current_user: User = await User.objects.aget(id=request.auth)
+        current_user: User = await User.objects.aget(wallet_address=request.auth)
         already_started = await Completion.objects.filter(user=request.auth, status=Status.HOLD).aexists()
         # already_started = False
         if not already_started:
-            completion_task: Task = await Task.objects.aget(id=data.task_id)
+            try:
+                completion_task: Task = await Task.objects.aget(id=data.task_id)
+            except Task.DoesNotExist:
+                return 404, {"detail": "Task does not exist"}
             if await Completion.objects.filter(task=completion_task).acount() > completion_task.limit_completions:
                 return 400, {"detail": "Completion limit reached"}
             completion_object: Completion = await Completion.objects.acreate(
-                user=current_user,
+                user=request.auth,
                 task=completion_task,
                 file=None,
                 completion_date_and_time=datetime.datetime.now(),
@@ -71,7 +72,6 @@ async def start_completion(request: WSGIRequest | ASGIRequest, data: CompletionS
 
 @router.get(
     "/sign-s3/",
-    auth=authenticate,
     response={200: FileOutAWS, 400: DetailOut},
     summary="Sign file and get an upload link",
 )
@@ -128,7 +128,6 @@ async def sign_s3_file(request: WSGIRequest | ASGIRequest, data: Query[FileIn]):
 
 @router.put(
     "/completions/{completion_id}/",
-    auth=authenticate,
     response={200: CompletionOut, 400: DetailOut},
     summary="Send completion with file",
 )
@@ -137,9 +136,7 @@ async def send_completion(
 ):
     try:
         completion_object: Completion = await Completion.objects.select_related(
-            "user",
-            "task",
-            "file"
+            "user", "task", "file"
         ).aget(id=completion_id)
         if completion_object.file is None:
             file_object: MyFile = await MyFile.objects.aget(file_uuid=data.file_uuid)
@@ -163,7 +160,6 @@ async def send_completion(
 
 @router.delete(
     "/completions/{completion_id}/",
-    auth=authenticate,
     response={200: DetailOut, 404: DetailOut},
     summary="Cancel completion if started",
 )
@@ -181,7 +177,6 @@ async def cancel_completion(
 
 @router.get(
     "/",
-    auth=authenticate,
     response=List[TaskOut],
     summary="List of all tasks with filtering",
 )
@@ -192,9 +187,9 @@ async def get_list_of_tasks(
     logging.error(filters.get_filter_expression())
     tasks = []
     try:
-        user: User = await User.objects.aget(id=request.auth)
+        user: User = await User.objects.aget(wallet_address=request.auth)
         async for task in Task.objects.filter(filters.get_filter_expression()).all():
-            if not await Completion.objects.filter(task=task, user=user).aexists():
+            if not await Completion.objects.filter(task=task, user=user.wallet_address).aexists():
                 if not task.task_paused:
                     if task.start_time is None or task.start_time <= timezone.now():
                         tasks.append(task)
@@ -207,7 +202,6 @@ async def get_list_of_tasks(
 
 @router.get(
     "/{task_id}/",
-    auth=authenticate,
     response={200: TaskOut, 404: DetailOut},
     summary="Get task info",
 )
@@ -221,7 +215,6 @@ async def get_task_info(request: WSGIRequest | ASGIRequest, task_id: int):
 
 @router.get(
     "/completions/{completion_id}",
-    auth=authenticate,
     response={200: CompletionOut, 404: DetailOut},
     summary="Get completion info",
 )
@@ -235,7 +228,6 @@ async def get_completion_info(request: WSGIRequest | ASGIRequest, completion_id:
 
 @router.get(
     "/completions/",
-    auth=authenticate,
     response={200: List[CompletionHistoryOut], 404: DetailOut},
     summary="Get list of user completions and validations",
 )
@@ -244,7 +236,7 @@ async def get_list_of_completions(
         request: WSGIRequest | ASGIRequest, filters: Query[CompletionFilterSchema]
 ):
     try:
-        current_user: User = await User.objects.aget(id=request.auth)
+        current_user: User = await User.objects.aget(wallet_address=request.auth)
         logging.error(filters.get_filter_expression())
         completions = []
 
@@ -254,7 +246,7 @@ async def get_list_of_completions(
         if parsed_task_type is None or "Task" in parsed_task_type:
             async for completion in (
                     Completion.objects.select_related("user", "task", "file")
-                            .filter(user=current_user)
+                            .filter(user=current_user.wallet_address)
                             .filter(filters.get_filter_expression())
             ):
                 completions.append({
@@ -289,7 +281,6 @@ async def get_list_of_completions(
 
 @router.get(
     "/validations/completions/",
-    auth=authenticate,
     response=List[ValidationListTaskOut],
     summary="List of all tasks with at least one completion to validate",
 )
@@ -299,11 +290,11 @@ async def get_list_of_tasks_to_validate(
 ):
     tasks = []
     try:
-        user: User = await User.objects.aget(id=request.auth)
+        user: User = await User.objects.aget(wallet_address=request.auth)
         async for task in Task.objects.filter(filters.get_filter_expression()).all():
-            pool = await task.get_validation_pool_without_current_user(user=user)
+            pool = await task.get_validation_pool_without_current_user(wallet_address=user.wallet_address)
             is_suitable = await task.is_suitable_to_be_validated(
-                user=user)  # Позволяет не выводить таск, который пользователь уже валидировал
+                wallet_address=user.wallet_address)  # Позволяет не выводить таск, который пользователь уже валидировал
 
             if pool and is_suitable:
                 if not task.validation_paused:
@@ -321,16 +312,15 @@ async def get_list_of_tasks_to_validate(
 
 @router.get(
     "/validations/{task_id}/",
-    auth=authenticate,
     response={200: CompletionOut, 400: DetailOut, 404: DetailOut},
     summary="Get a completion from task to validate",
 )
 async def get_completion_to_validate(request: WSGIRequest | ASGIRequest, task_id: int):
     try:
         task: Task = await Task.objects.aget(id=task_id)
-        user: User = await User.objects.aget(id=request.auth)
+        user: User = await User.objects.aget(wallet_address=request.auth)
         # max_rates_allowed = task.limit_completions * (task.validation_percent / 100)
-        eligible_completions_list = await task.get_validation_pool_without_current_user(user=user)
+        eligible_completions_list = await task.get_validation_pool_without_current_user(wallet_address=user.wallet_address)
         if eligible_completions_list:
             random_completion = random.choice(eligible_completions_list)
             return random_completion
@@ -343,7 +333,6 @@ async def get_completion_to_validate(request: WSGIRequest | ASGIRequest, task_id
 
 @router.post(
     "/validations/completions/{completion_id}/",
-    auth=authenticate,
     response={200: CompletionOut, 400: DetailOut, 404: DetailOut},
     summary="Validate task completion and create a rate record",
 )
@@ -357,7 +346,7 @@ async def validate(
         completion_object: Completion = await Completion.objects.select_related(
             "user", "task", "file"
         ).aget(id=completion_id)
-        current_user: User = await User.objects.aget(id=request.auth)
+        current_user: User = await User.objects.aget(wallet_address=request.auth)
 
         if not await RateRecord.objects.filter(completion_id=completion_id, validator=current_user).aexists():
             new_rate_record: RateRecord = await RateRecord.objects.acreate(
@@ -401,7 +390,7 @@ async def validate(
                     validators_to_reward = rate_records.filter(score__gte=3).values_list("validator", flat=True)
                     # self._reward_users(completion=completion, user_ids=validators_to_reward, main_user=completion.user.id)
 
-                    main_user = await User.objects.select_related("referral_user").aget(id=completion.user.id)
+                    main_user = await User.objects.select_related("referral_user").aget(wallet_address=completion.user.id)
                     task_reward = completion.task.reward
                     main_user.balance += await sync_to_async(main_user.calculate_bonus)(task_reward)
                     transaction = await Transaction.objects.acreate(
@@ -431,7 +420,7 @@ async def validate(
                     completion.status = Status.ACCEPTED
                     await completion.asave()
 
-                    async for user in await sync_to_async(User.objects.filter)(id__in=validators_to_reward):
+                    async for user in await sync_to_async(User.objects.filter)(wallet_address__in=validators_to_reward):
                         user.balance += completion.task.validation_reward
                         transaction = await Transaction.objects.acreate(
                             user=user,

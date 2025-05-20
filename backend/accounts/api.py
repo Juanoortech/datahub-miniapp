@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from asgiref.sync import sync_to_async
 from django.db.models import QuerySet
-from ninja import Router, Query
+from ninja import Router, Query, Header
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.handlers.asgi import ASGIRequest
 from ninja.pagination import paginate
@@ -19,21 +19,6 @@ from eth_account.messages import encode_defunct
 from eth_account import Account
 
 router = Router()
-
-
-async def authenticate(request: WSGIRequest | ASGIRequest):
-    token = request.headers.get("Authorization")
-    if token:
-        try:
-            payload = jwt.decode(
-                jwt=token, key=settings.SECRET_KEY, algorithms=["HS256"]
-            )
-            user = payload.get("user", None)
-            if user:
-                return user
-        except (jwt.ExpiredSignatureError, jwt.InvalidSignatureError, jwt.DecodeError):
-            pass
-    return
 
 
 async def update_ref_level(referral_user: User):
@@ -86,14 +71,13 @@ def generate_jwt(user: User) -> str:
 
 @router.get(
     "/",
-    auth=authenticate,
     response={200: UserOut, 401: DetailOut},
     summary="Get current authenticated user's info",
 )
 async def me(request: WSGIRequest | ASGIRequest):
     user: Optional[User] = None
     try:
-        user = await User.objects.aget(id=request.auth)
+        user = await User.objects.aget(wallet_address=request.auth)
     except User.DoesNotExist:
         return 401, {"detail": "User not found"}
     return user
@@ -101,8 +85,9 @@ async def me(request: WSGIRequest | ASGIRequest):
 
 @router.post(
     "/",
-    response={200: UserOut},
-    summary="Create a new user"
+    response={200: UserTokenOut, 400: DetailOut},
+    summary="Create a new user",
+    auth=None,
 )
 async def create_user(request: WSGIRequest | ASGIRequest, payload: UserInit):
     # Verify signature before creating user
@@ -126,19 +111,20 @@ async def create_user(request: WSGIRequest | ASGIRequest, payload: UserInit):
                 await add_initial_bonus(inviter=inviter, from_user=new_user)
                 await update_ref_level(inviter)
     await new_user.asave()
-    return 200, new_user
+    # Issue JWT for the new user
+    token = generate_jwt(new_user)
+    return 200, {"token": token}
 
 
 @router.post(
     "/first-login/",
-    auth=authenticate,
     response={200: UserOut, 404: DetailOut},
     summary="Set the first login flag of the current user",
 )
 async def set_first_login(request: WSGIRequest | ASGIRequest):
     user: Optional[User] = None
     try:
-        user = await User.objects.aget(id=request.auth)
+        user = await User.objects.aget(wallet_address=request.auth)
         user.first_login = False
         await user.asave()
     except User.DoesNotExist:
@@ -148,7 +134,6 @@ async def set_first_login(request: WSGIRequest | ASGIRequest):
 
 @router.get(
     "/transactions/",
-    auth=authenticate,
     response=List[TransactionSchema],
     summary="Get current authenticated user's transactions history",
 )
@@ -165,16 +150,13 @@ async def transactions_history(request: WSGIRequest | ASGIRequest, filters: Quer
 
 @router.get(
     "/referrals/",
-    auth=authenticate,
     response=List[ReferralListUserOut],
     summary="Get current authenticated user's referrals",
 )
 @paginate(MyPaginator)
 async def get_user_referrals(request: WSGIRequest | ASGIRequest):
     referrals = []
-    async for referral in User.objects.filter(referral_user=request.auth).order_by(
-            "id"
-    ):
+    async for referral in User.objects.filter(referral_user=request.auth).order_by("wallet_address"):
         ref_sum: int = await referral.get_ref_sum_from_user()
         referrals.append(
             {
@@ -187,32 +169,30 @@ async def get_user_referrals(request: WSGIRequest | ASGIRequest):
 
 @router.get(
     "/leaderboard/",
-    auth=authenticate,
     response=List[LeaderBoardUserSchema],
     summary="Get top 100 users",
 )
 @paginate(MyPaginator)
 async def get_leaderboard_info(request: WSGIRequest | ASGIRequest):
     users = [{
-        "id": user.id,
+        "id": user.wallet_address,
         "avatar": user.photo,
         "name": user.name,
         "points": user.balance,
-    } async for user in User.objects.order_by("-balance", "id")][:100]
+    } async for user in User.objects.order_by("-balance", "wallet_address")][:100]
 
     return users
 
 
 @router.get(
     "/leaderboard/current/",
-    auth=authenticate,
     response={200: LeaderBoardUserInfoSchema, 401: DetailOut},
     summary="Get user's leaderboard info",
 )
 async def get_user_leaderboard_info(request: WSGIRequest | ASGIRequest):
     response = {}
     try:
-        user: User = await User.objects.aget(id=request.auth)
+        user: User = await User.objects.aget(wallet_address=request.auth)
         rank: int = await user.get_rank()
         if rank <= 5:
             current_bonus = await sync_to_async(user.get_current_bonus)()
@@ -238,7 +218,7 @@ async def connect_wallet_to_user(request: WSGIRequest | ASGIRequest, data: Conne
         user.wallet_was_connected = True
         await user.asave()
         return 200, {
-            "user_id": user.id,
+            "user_id": user.wallet_address,
             "balance": user.balance,
         }
     except User.DoesNotExist:
@@ -252,9 +232,9 @@ async def connect_wallet_to_user(request: WSGIRequest | ASGIRequest, data: Conne
 )
 async def withdraw_points(request: WSGIRequest | ASGIRequest, data: WithdrawSchema):
     successful_withdraws = []
-    for user_id in data.user_ids:
+    for user_address in data.user_addresses:
         try:
-            user: User = await User.objects.aget(id=user_id)
+            user: User = await User.objects.aget(wallet_address=user_address)
             transaction = await Transaction.objects.acreate(
                 user=user,
                 sum_of_transaction=user.balance,
@@ -268,7 +248,7 @@ async def withdraw_points(request: WSGIRequest | ASGIRequest, data: WithdrawSche
                 user.balance = 0
                 await user.asave()
                 await transaction.asave()
-                successful_withdraws.append({"user_id": user_id, "balance": old_balance})
+                successful_withdraws.append({"user_id": user_address, "balance": old_balance})
             else:
                 transaction.status = TransactionStatus.DECLINED
                 await transaction.asave()
@@ -277,19 +257,3 @@ async def withdraw_points(request: WSGIRequest | ASGIRequest, data: WithdrawSche
             return 404, {"detail": "User not found"}
 
     return 200, successful_withdraws
-
-
-@router.post(
-    "/auth/web3/",
-    response={200: UserTokenOut, 400: DetailOut},
-    summary="Authenticate user via Web3 signature and get JWT",
-)
-async def authenticate_web3(request: WSGIRequest | ASGIRequest, data: SignatureVerifyIn):
-    # Verify the signature using eth-account
-    if not verify_signature(data.wallet_address, data.signature, data.message):
-        return 400, {"detail": "Invalid signature"}
-    # Get or create the user
-    user, _ = await User.objects.aget_or_create(wallet_address=data.wallet_address)
-    # Issue JWT
-    token = generate_jwt(user)
-    return 200, {"token": token}

@@ -10,7 +10,6 @@ from django.core.handlers.wsgi import WSGIRequest
 
 from ninja.pagination import paginate
 
-from accounts.api import authenticate
 from accounts.models import User, Transaction, TransactionType, DepositType, TransactionStatus
 from accounts.pagination import MyPaginator
 from challenges.models import Challenge, ChallengeCompletion, ChallengeTypes
@@ -19,10 +18,11 @@ from challenges.schemes import DetailOut, ChallengeFilterSchema, \
 
 router = Router()
 
+# All endpoints now use global authentication
+
 
 @router.get(
     "/",
-    auth=authenticate,
     response={200: List[ChallengeListSchema]}
 )
 @paginate(MyPaginator)
@@ -30,7 +30,7 @@ async def challenges_list(request: WSGIRequest | ASGIRequest, filters: Query[Cha
     response = []
     parse_comma_list = lambda x: [v for v in (v.strip() for v in x.split(",")) if v]
     parsed_status = parse_comma_list(filters.status) if filters.status else None
-    async for i in Challenge.objects.filter(filters.get_filter_expression()).select_related("channel"):
+    async for i in Challenge.objects.filter(filters.get_filter_expression()):
         challenge_status = await i.get_user_challenge_status(user=request.auth)
         data = {
             "challenge": i,
@@ -54,7 +54,7 @@ async def add_reward(user: User, challenge: Challenge, completion_ch_object: Cha
     )
     user.balance += challenge.reward
     completion_ch_object.claimed = True
-    referral: User = (await User.objects.filter(id=user.id).select_related("referral_user").afirst()).referral_user
+    referral: User = (await User.objects.filter(wallet_address=user.wallet_address).select_related("referral_user").afirst()).referral_user
     if referral is not None:
         referral_reward = challenge.reward * (0.05 * referral.referral_level)
         referral_reward_transaction: Transaction = await Transaction.objects.acreate(
@@ -76,13 +76,12 @@ async def add_reward(user: User, challenge: Challenge, completion_ch_object: Cha
 
 @router.post(
     "/{challenge_id}/",
-    auth=authenticate,
     response={200: CompletionSendOut, 400: DetailOut}
 )
 async def challenges_complete(request: WSGIRequest | ASGIRequest, challenge_id: int):
-    user: User = await User.objects.aget(id=request.auth)
+    user: User = await User.objects.aget(wallet_address=request.auth)
 
-    challenge: Challenge = await Challenge.objects.filter(id=challenge_id).select_related("channel").afirst()
+    challenge: Challenge = await Challenge.objects.filter(id=challenge_id).afirst()
     if not challenge:
         return 400, {"detail": "Task not found"}
     if await ChallengeCompletion.objects.filter(challenge=challenge,
@@ -137,12 +136,11 @@ async def challenges_complete(request: WSGIRequest | ASGIRequest, challenge_id: 
 
 @router.get(
     "/{challenge_id}/",
-    auth=authenticate,
     response={200: ChallengeSchema, 404: DetailOut}
 )
 async def challenge_info(request: WSGIRequest | ASGIRequest, challenge_id: int):
     try:
-        challenge: Challenge = await Challenge.objects.select_related("channel").aget(id=challenge_id)
+        challenge: Challenge = await Challenge.objects.aget(id=challenge_id)
     except Challenge.DoesNotExist:
         return 404, {"detail": "Challenge not found"}
     return challenge
@@ -150,12 +148,11 @@ async def challenge_info(request: WSGIRequest | ASGIRequest, challenge_id: int):
 
 @router.get(
     "/completions/{challenge_id}/",
-    auth=authenticate,
     response={200: ChallengeCompletionSchema, 404: DetailOut}
 )
 async def completion_by_challenge_id_info(request: WSGIRequest | ASGIRequest, challenge_id: int):
     try:
-        challenge: Challenge = await Challenge.objects.select_related("channel").aget(id=challenge_id)
+        challenge: Challenge = await Challenge.objects.aget(id=challenge_id)
         challenges_completion: ChallengeCompletion = await ChallengeCompletion.objects.select_related(
             "user",
             "challenge",
