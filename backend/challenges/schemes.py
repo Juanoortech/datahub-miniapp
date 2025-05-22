@@ -19,10 +19,6 @@ CommaList = Annotated[
 ]
 
 
-class ChannelSchema(Schema):
-    uri: str
-
-
 class ChallengeSchema(Schema):
     id: int
     avatar: Optional[str] = None
@@ -34,7 +30,6 @@ class ChallengeSchema(Schema):
     target_user_language: Optional[str] = None
     target_user_status: Optional[bool] = None
     completion_limit: int
-    channel: Optional[ChannelSchema]
     redirect_link: Optional[str] = None
 
 

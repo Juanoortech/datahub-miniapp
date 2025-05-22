@@ -112,8 +112,7 @@ async def challenges_complete(request: WSGIRequest | ASGIRequest, challenge_id: 
         return 400, {"detail": "Already Claimed"}
     else:
         if challenge.internal_type == ChallengeTypes.REAL:
-            if challenge.channel is None:
-                return 400, {"detail": "Channel not specified"}
+            # Removed check for challenge.channel
             # TODO: По-хорошему сделать асинхронным
             return 200, {
                 "created": created,
@@ -155,8 +154,7 @@ async def completion_by_challenge_id_info(request: WSGIRequest | ASGIRequest, ch
         challenge: Challenge = await Challenge.objects.aget(id=challenge_id)
         challenges_completion: ChallengeCompletion = await ChallengeCompletion.objects.select_related(
             "user",
-            "challenge",
-            "challenge__channel"
+            "challenge"
         ).aget(
             challenge=challenge, user=request.auth
         )
