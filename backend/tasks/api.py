@@ -46,7 +46,7 @@ router = Router()
 async def start_completion(request: WSGIRequest | ASGIRequest, data: CompletionStartIn):
     try:
         current_user: User = await User.objects.aget(wallet_address=request.auth)
-        already_started = await Completion.objects.filter(user=request.auth, status=Status.HOLD).aexists()
+        already_started = await Completion.objects.filter(user=current_user, status=Status.HOLD).aexists()
         # already_started = False
         if not already_started:
             try:
@@ -56,14 +56,68 @@ async def start_completion(request: WSGIRequest | ASGIRequest, data: CompletionS
             if await Completion.objects.filter(task=completion_task).acount() > completion_task.limit_completions:
                 return 400, {"detail": "Completion limit reached"}
             completion_object: Completion = await Completion.objects.acreate(
-                user=request.auth,
+                user=current_user,
                 task=completion_task,
                 file=None,
                 completion_date_and_time=datetime.datetime.now(),
                 status=Status.HOLD,
             )
             await completion_object.asave()
-            return completion_object
+            # Fetch related objects to avoid async serialization issues
+            completion_object = await Completion.objects.select_related("user", "task", "file").aget(id=completion_object.id)
+            user = completion_object.user
+            task = completion_object.task
+            file = completion_object.file
+
+            user_out = {
+                "wallet_address": user.wallet_address,
+                "photo": user.photo,
+                "name": user.name,
+                "balance": user.balance,
+                "referral_code": user.referral_code,
+                "wallet_connect_code": user.wallet_connect_code,
+                "wallet_was_connected": user.wallet_was_connected,
+                "referral_earnings": user.referral_earnings,
+                "referral_level": user.referral_level,
+                "first_login": user.first_login,
+            }
+            task_out = {
+                "id": task.id,
+                "title": task.title,
+                "internal_type": task.internal_type,
+                "photo": str(task.photo),
+                "task_instruction": str(task.task_instruction) if task.task_instruction else None,
+                "reward": task.reward,
+                "description": task.description,
+                "text": task.text,
+                "audio_text": task.audio_text,
+                "example": str(task.example) if task.example else None,
+                "time_to_complete": task.time_to_complete,
+                "limit_completions": task.limit_completions,
+                "limit_file_size": task.limit_file_size,
+                "limit_video_length": task.limit_video_length,
+                "limit_audio_length": task.limit_audio_length,
+                "validation_percent": task.validation_percent,
+                "when_was_sent_to_validation": task.when_was_sent_to_validation,
+            }
+            file_out = None
+            if file:
+                file_out = {
+                    "original_file_name": file.original_file_name,
+                    "file_uuid": file.file_uuid,
+                    "file_type": file.file_type,
+                    "upload_finished_at": file.upload_finished_at,
+                    "url": file.url,
+                }
+            return {
+                "id": completion_object.id,
+                "user": user_out,
+                "task": task_out,
+                "file": file_out,
+                "completion_date_and_time": completion_object.completion_date_and_time,
+                "status": completion_object.status,
+                "score": completion_object.score,
+            }
         else:
             return 400, {"detail": "Some completion has been already started"}
     except User.DoesNotExist:
@@ -220,10 +274,62 @@ async def get_task_info(request: WSGIRequest | ASGIRequest, task_id: int):
 )
 async def get_completion_info(request: WSGIRequest | ASGIRequest, completion_id: int):
     try:
-        completion: Completion = await Completion.objects.aget(id=completion_id)
+        completion = await Completion.objects.select_related("user", "task", "file").aget(id=completion_id)
     except Completion.DoesNotExist:
         return 404, {"detail": "No completion found"}
-    return completion
+    user = completion.user
+    task = completion.task
+    file = completion.file
+
+    user_out = {
+        "wallet_address": user.wallet_address,
+        "photo": user.photo,
+        "name": user.name,
+        "balance": user.balance,
+        "referral_code": user.referral_code,
+        "wallet_connect_code": user.wallet_connect_code,
+        "wallet_was_connected": user.wallet_was_connected,
+        "referral_earnings": user.referral_earnings,
+        "referral_level": user.referral_level,
+        "first_login": user.first_login,
+    }
+    task_out = {
+        "id": task.id,
+        "title": task.title,
+        "internal_type": task.internal_type,
+        "photo": str(task.photo),
+        "task_instruction": str(task.task_instruction) if task.task_instruction else None,
+        "reward": task.reward,
+        "description": task.description,
+        "text": task.text,
+        "audio_text": task.audio_text,
+        "example": str(task.example) if task.example else None,
+        "time_to_complete": task.time_to_complete,
+        "limit_completions": task.limit_completions,
+        "limit_file_size": task.limit_file_size,
+        "limit_video_length": task.limit_video_length,
+        "limit_audio_length": task.limit_audio_length,
+        "validation_percent": task.validation_percent,
+        "when_was_sent_to_validation": task.when_was_sent_to_validation,
+    }
+    file_out = None
+    if file:
+        file_out = {
+            "original_file_name": file.original_file_name,
+            "file_uuid": file.file_uuid,
+            "file_type": file.file_type,
+            "upload_finished_at": file.upload_finished_at,
+            "url": file.url,
+        }
+    return {
+        "id": completion.id,
+        "user": user_out,
+        "task": task_out,
+        "file": file_out,
+        "completion_date_and_time": completion.completion_date_and_time,
+        "status": completion.status,
+        "score": completion.score,
+    }
 
 
 @router.get(
@@ -292,9 +398,8 @@ async def get_list_of_tasks_to_validate(
     try:
         user: User = await User.objects.aget(wallet_address=request.auth)
         async for task in Task.objects.filter(filters.get_filter_expression()).all():
-            pool = await task.get_validation_pool_without_current_user(wallet_address=user.wallet_address)
-            is_suitable = await task.is_suitable_to_be_validated(
-                wallet_address=user.wallet_address)  # Позволяет не выводить таск, который пользователь уже валидировал
+            pool = await task.get_validation_pool_without_current_user(user)
+            is_suitable = await task.is_suitable_to_be_validated(user)  # Позволяет не выводить таск, который пользователь уже валидировал
 
             if pool and is_suitable:
                 if not task.validation_paused:
@@ -320,7 +425,7 @@ async def get_completion_to_validate(request: WSGIRequest | ASGIRequest, task_id
         task: Task = await Task.objects.aget(id=task_id)
         user: User = await User.objects.aget(wallet_address=request.auth)
         # max_rates_allowed = task.limit_completions * (task.validation_percent / 100)
-        eligible_completions_list = await task.get_validation_pool_without_current_user(wallet_address=user.wallet_address)
+        eligible_completions_list = await task.get_validation_pool_without_current_user(user)
         if eligible_completions_list:
             random_completion = random.choice(eligible_completions_list)
             return random_completion
